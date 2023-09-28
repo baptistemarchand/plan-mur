@@ -202,14 +202,13 @@ const Wall = () => {
 
 const Stats = () => {
   return (
-    <div class="m-8">
-      <div class="text-xl mt-8">Par couleur</div>
+    <div class="">
+      <div class="text-xl mt-6 ml-3">Par couleur</div>
       <div class="">
         {colors.map((color) => (
           <div
             class={`flex px-2 py-1`}
           >
-            <div class="mr-4 w-10">{color}</div>
             {allRoutes.filter((route) => route.color === color).map((r) => (
               <div
                 class={`text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
@@ -222,18 +221,17 @@ const Stats = () => {
           </div>
         ))}
       </div>
-      <div class="text-xl mt-8">Par cotation</div>
+      <div class="text-xl mt-6 ml-3">Par cotation</div>
       <div class="">
         {allGrades.map((grade) => (
           <div
             class={`flex px-2 py-1`}
           >
-            <div class="mr-4 w-10">{grade}</div>
             {allRoutes.filter((route) => route.grade.startsWith(grade)).map((
               r,
             ) => (
               <div
-                class={`text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
+                class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
                   getBg(r.color)
                 } ${getTextColor(r.color)}`}
               >
