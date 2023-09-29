@@ -52,7 +52,7 @@ export const getTextColor = (color: Color) => {
 export const getBorderColor = (color: Color) => {
   if (
     color === "blanc" || color === "jaune" ||
-    color === "orange"
+    color === "orange" || color === "beige"
   ) {
     return "border-black";
   }

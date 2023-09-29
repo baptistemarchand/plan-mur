@@ -7,16 +7,3 @@ export type Route = {
   setAtMonth: string;
   author?: string;
 };
-
-export const authors = [
-  "Baptiste",
-  "Ivanne",
-  "Christophe",
-  "Max",
-  "JB",
-  "Seb",
-  "Charline",
-  "Thomas",
-  "Benoit",
-  "Bruno",
-] as const;

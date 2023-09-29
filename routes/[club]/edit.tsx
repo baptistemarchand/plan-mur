@@ -10,9 +10,7 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
   // console.log(lines);
   // for (const routes of lines) {
   //   for (const route of routes) {
-  //     const { setAtMonth, setAtYear } = route;
-  //     route.setAtMonth = setAtYear as any;
-  //     route.setAtYear = setAtMonth;
+  //     route.author = route.author?.toLowerCase();
   //   }
   // }
   // console.log(lines);

@@ -1,6 +1,6 @@
 import { createContext } from "preact";
 import { colors, getBg, getBorderColor, getTextColor } from "../colors.ts";
-import { authors, Route } from "../types.ts";
+import { Route } from "../types.ts";
 import { computed, effect, Signal, signal } from "@preact/signals";
 import { useContext } from "preact/hooks";
 import { IS_BROWSER } from "$fresh/runtime.ts";
@@ -72,8 +72,20 @@ const createAppContext = (lines_: Route[][], club: string) => {
     selectedLine,
     selectedRoute,
     lines,
+    openAuthorPopup: signal(false),
     currentRoute: computed(() =>
       lines.value[selectedLine.value][selectedRoute.value]
+    ),
+    allAuthors: computed(
+      () =>
+        [
+          ...new Set(
+            lines.value.flatMap((routes) =>
+              routes.map((route) => route.author!)
+            )
+              .filter(Boolean),
+          ),
+        ].map((x) => x.toLowerCase()).sort(),
     ),
   });
 };
@@ -103,8 +115,8 @@ const LinePicker = () => {
     <div class="grid grid-cols-8 h-full gap-px bg-black border border-black">
       {lines.value.map((_, i) => (
         <div
-          class={`flex items-center justify-center bg-white text-xl ${
-            selectedLine.value === i ? "bg-gray-300" : ""
+          class={`flex items-center justify-center text-xl ${
+            selectedLine.value === i ? "bg-gray-300" : "bg-white"
           }`}
           onClick={() => {
             selectedLine.value = i;
@@ -150,7 +162,7 @@ const GradePicker = () => {
     <div class="grid grid-rows-4 grid-flow-col gap-px bg-black border border-black h-full text-3xl font-semibold">
       {[4, 5, 6, 7].map((n) => (
         <div
-          class={`flex items-center justify-center bg-white ${
+          class={`flex items-center justify-center ${
             currentRoute.value.grade.includes(n.toString())
               ? "bg-gray-300"
               : "bg-white"
@@ -169,7 +181,7 @@ const GradePicker = () => {
       ))}
       {["a", "b", "c"].map((l) => (
         <div
-          class={`flex items-center justify-center bg-white ${
+          class={`flex items-center justify-center ${
             currentRoute.value.grade.includes(l) ? "bg-gray-300" : "bg-white"
           }`}
           onClick={() => {
@@ -254,21 +266,6 @@ const RouteCard = (
           : ""} {route.setAtYear}
       </div>
       <div class="text-xl">{route.author}</div>
-      {selected && (
-        <div
-          class="text-xl font-semibold"
-          onClick={() => {
-            lines.value = lines.value.map((routes, i) =>
-              i === selectedLine.value
-                ? routes.filter((_, i) => selectedRoute.value !== i)
-                : routes
-            );
-            console.log(lines.value[selectedLine.value]);
-          }}
-        >
-          supprimer
-        </div>
-      )}
     </div>
   );
 };
@@ -360,7 +357,7 @@ const SetAtPicker = () => {
       ))}
       {[y, y - 1, y - 2, "vieux"].map((y_) => (
         <div
-          class={`flex items-center justify-center bg-white ${
+          class={`flex items-center justify-center ${
             currentRoute.value.setAtYear === y_.toString()
               ? "bg-gray-300"
               : "bg-white"
@@ -387,8 +384,91 @@ const SetAtPicker = () => {
   );
 };
 
+const AuthorPickerPopup = () => {
+  const {
+    lines,
+    selectedLine,
+    selectedRoute,
+    currentRoute,
+    allAuthors,
+    openAuthorPopup,
+  } = useContext(
+    AppContext,
+  );
+
+  if (!currentRoute.value || !openAuthorPopup.value) {
+    return null;
+  }
+
+  const newAuthor = signal("");
+
+  const addAuthor = (author: string) => {
+    lines.value = lines.value.map((routes, i) =>
+      i === selectedLine.value
+        ? routes.map((route, j) =>
+          j === selectedRoute.value
+            ? {
+              ...route,
+              author: author.toLowerCase(),
+            }
+            : route
+        )
+        : routes
+    );
+    openAuthorPopup.value = false;
+  };
+
+  return (
+    <div class="h-full absolute w-full">
+      <div class="grid bg-black grid-rows-5 grid-flow-col gap-px h-4/5 w-full">
+        {allAuthors.value.map((author) => (
+          <div
+            class={`flex items-center justify-center ${
+              currentRoute.value.author === author ? "bg-gray-300" : "bg-white"
+            }`}
+            onClick={() => addAuthor(author)}
+          >
+            {author}
+          </div>
+        ))}
+      </div>
+      <div class="bg-white flex flex-col h-1/5 border-t border-black pt-4">
+        <input
+          type="text"
+          class="border border-black rounded border-2 text-center mx-8 mt-4 h-10 text-2xl"
+          placeholder="Chris Sharma"
+          onInput={(
+            e,
+          ) => (newAuthor.value = (e.target as HTMLInputElement).value)}
+        />
+        <div class="mx-auto flex gap-4">
+          <button
+            class="text-2xl bg-green-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
+            onClick={() => {
+              if (newAuthor.value) {
+                addAuthor(newAuthor.value);
+                newAuthor.value = "";
+              }
+            }}
+          >
+            Ajouter
+          </button>
+          <button
+            class="text-2xl bg-red-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
+            onClick={() => {
+              openAuthorPopup.value = false;
+            }}
+          >
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AuthorPicker = () => {
-  const { lines, selectedLine, selectedRoute, currentRoute } = useContext(
+  const { openAuthorPopup, currentRoute } = useContext(
     AppContext,
   );
 
@@ -397,30 +477,37 @@ const AuthorPicker = () => {
   }
 
   return (
-    <div class="grid grid-rows-5 grid-flow-col gap-px bg-black border border-black h-full">
-      {authors.map((author) => (
-        <div
-          class={`flex items-center justify-center ${
-            currentRoute.value.author === author ? "bg-gray-300" : "bg-white"
-          }`}
-          onClick={() => {
-            lines.value = lines.value.map((routes, i) =>
-              i === selectedLine.value
-                ? routes.map((route, j) =>
-                  j === selectedRoute.value
-                    ? {
-                      ...route,
-                      author,
-                    }
-                    : route
-                )
-                : routes
-            );
-          }}
-        >
-          {author}
-        </div>
-      ))}
+    <div
+      class="text-xl bg-blue-500 p-3 text-center font-semibold rounded m-2 text-white mt-4"
+      onClick={() => openAuthorPopup.value = true}
+    >
+      Ouvreur.euse
+    </div>
+  );
+};
+
+const DeleteButton = () => {
+  const { currentRoute, lines, selectedLine, selectedRoute } = useContext(
+    AppContext,
+  );
+
+  if (!currentRoute.value) {
+    return null;
+  }
+
+  return (
+    <div
+      class="text-xl bg-red-500 p-3 text-center font-semibold rounded m-2 text-white mt-4"
+      onClick={() => {
+        lines.value = lines.value.map((routes, i) =>
+          i === selectedLine.value
+            ? routes.filter((_, i) => selectedRoute.value !== i)
+            : routes
+        );
+        console.log(lines.value[selectedLine.value]);
+      }}
+    >
+      Supprimer
     </div>
   );
 };
@@ -433,6 +520,7 @@ export default function Editor(
       value={createAppContext(lines, club)}
     >
       <div class="h-screen">
+        <AuthorPickerPopup />
         <SyncIndicator />
         <div class="h-1/6">
           <LinePicker />
@@ -453,6 +541,7 @@ export default function Editor(
             </div>
             <div class="h-1/3">
               <AuthorPicker />
+              <DeleteButton />
             </div>
           </div>
 
