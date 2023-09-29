@@ -20,7 +20,7 @@ const debounce = <F extends (...args: Parameters<F>) => ReturnType<F>>(
 };
 
 type DirtyState = "DIRTY" | "LOADING" | "SYNCED";
-const sync_ = (
+const sync_ = async (
   club: string,
   lines: Route[][],
   dirtySate: Signal<DirtyState>,
@@ -29,7 +29,7 @@ const sync_ = (
     return;
   }
   dirtySate.value = "LOADING";
-  fetch(`/api/sync?club=${club}`, {
+  await fetch(`/api/sync?club=${club}`, {
     method: "POST",
     headers: {
       "Accept": "application/json",
