@@ -19,12 +19,16 @@ const debounce = <F extends (...args: Parameters<F>) => ReturnType<F>>(
   return debounced;
 };
 
-const sync_ = (club: string, lines: Route[][], dirty: Signal<boolean>) => {
+type DirtyState = "DIRTY" | "LOADING" | "SYNCED";
+const sync_ = (
+  club: string,
+  lines: Route[][],
+  dirtySate: Signal<DirtyState>,
+) => {
   if (!IS_BROWSER) {
     return;
   }
-  console.log("Syncing");
-
+  dirtySate.value = "LOADING";
   fetch(`/api/sync?club=${club}`, {
     method: "POST",
     headers: {
@@ -33,31 +37,38 @@ const sync_ = (club: string, lines: Route[][], dirty: Signal<boolean>) => {
     },
     body: JSON.stringify(lines),
   });
-  dirty.value = false;
+  dirtySate.value = "SYNCED";
 };
 
 const sync = debounce(sync_, 3000);
 
 const SyncIndicator = () => {
-  const { dirty } = useContext(AppContext);
-  return (
-    <div class={`${dirty.value ? "bg-yellow-500" : "bg-green-400"} h-1`}></div>
-  );
+  const { dirtySate } = useContext(AppContext);
+  const color = (() => {
+    if (dirtySate.value === "DIRTY") {
+      return "bg-yellow-300";
+    }
+    if (dirtySate.value === "LOADING") {
+      return "bg-yellow-500";
+    }
+    return "bg-green-400";
+  })();
+  return <div class={`${color} h-1`}></div>;
 };
 
 const createAppContext = (lines_: Route[][], club: string) => {
   const selectedLine = signal(0);
   const selectedRoute = signal(0);
   const lines = signal(lines_);
-  const dirty = signal(false);
+  const dirtySate = signal<DirtyState>("SYNCED");
 
   effect(() => {
-    dirty.value = true;
-    sync(club, lines.value, dirty);
+    dirtySate.value = "DIRTY";
+    sync(club, lines.value, dirtySate);
   });
 
   return ({
-    dirty,
+    dirtySate,
     selectedLine,
     selectedRoute,
     lines,

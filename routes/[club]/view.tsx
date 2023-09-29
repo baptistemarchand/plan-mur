@@ -82,7 +82,9 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
 
 export default async function Mur(_req: Request, ctx: RouteContext) {
   const kv = await Deno.openKv();
-  const result = await kv.get<Route[][]>(["lines", ctx.params.club]);
+  const result = await kv.get<Route[][]>(["lines", ctx.params.club], {
+    consistency: "eventual",
+  });
   const lines = result.value ?? demo;
 
   return (
