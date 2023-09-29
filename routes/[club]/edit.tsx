@@ -20,7 +20,7 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
 
   return (
     <div>
-      <Editor lines={lines} />
+      <Editor lines={lines} club={ctx.params.club} />
     </div>
   );
 }

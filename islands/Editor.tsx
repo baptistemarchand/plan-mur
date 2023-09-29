@@ -1,15 +1,63 @@
 import { createContext } from "preact";
 import { colors, getBg, getBorderColor, getTextColor } from "../colors.ts";
 import { authors, Route } from "../types.ts";
-import { computed, signal } from "@preact/signals";
+import { computed, effect, Signal, signal } from "@preact/signals";
 import { useContext } from "preact/hooks";
+import { IS_BROWSER } from "$fresh/runtime.ts";
 
-const createAppContext = (lines_: Route[][]) => {
+const debounce = <F extends (...args: Parameters<F>) => ReturnType<F>>(
+  func: F,
+  waitFor: number,
+) => {
+  let timeout: number;
+
+  const debounced = (...args: Parameters<F>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), waitFor);
+  };
+
+  return debounced;
+};
+
+const sync_ = (club: string, lines: Route[][], dirty: Signal<boolean>) => {
+  if (!IS_BROWSER) {
+    return;
+  }
+  console.log("Syncing");
+
+  fetch(`/api/sync?club=${club}`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(lines),
+  });
+  dirty.value = false;
+};
+
+const sync = debounce(sync_, 3000);
+
+const SyncIndicator = () => {
+  const { dirty } = useContext(AppContext);
+  return (
+    <div class={`${dirty.value ? "bg-yellow-500" : "bg-green-400"} h-1`}></div>
+  );
+};
+
+const createAppContext = (lines_: Route[][], club: string) => {
   const selectedLine = signal(0);
   const selectedRoute = signal(0);
   const lines = signal(lines_);
+  const dirty = signal(false);
+
+  effect(() => {
+    dirty.value = true;
+    sync(club, lines.value, dirty);
+  });
 
   return ({
+    dirty,
     selectedLine,
     selectedRoute,
     lines,
@@ -366,12 +414,15 @@ const AuthorPicker = () => {
   );
 };
 
-export default function Editor({ lines }: { lines: Route[][] }) {
+export default function Editor(
+  { lines, club }: { lines: Route[][]; club: string },
+) {
   return (
     <AppContext.Provider
-      value={createAppContext(lines)}
+      value={createAppContext(lines, club)}
     >
       <div class="h-screen">
+        <SyncIndicator />
         <div class="h-1/6">
           <LinePicker />
         </div>
