@@ -1,10 +1,8 @@
 import { Color } from "./colors.ts";
 
-export type Grade = `${"4" | "5" | "6" | "7"}${"a" | "b" | "c"}${"+" | ""}`;
-
 export type Route = {
   color: Color;
-  grade: Grade;
+  grade: string;
   setAtYear: string;
   setAtMonth: string;
   author?: string;

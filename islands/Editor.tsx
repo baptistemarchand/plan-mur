@@ -1,14 +1,30 @@
+import { createContext } from "preact";
 import { colors, getBg, getBorderColor, getTextColor } from "../colors.ts";
-import { authors, Grade, Route } from "../types.ts";
-import type { Signal } from "@preact/signals";
-import { useSignal } from "@preact/signals";
+import { authors, Route } from "../types.ts";
+import { computed, signal } from "@preact/signals";
+import { useContext } from "preact/hooks";
 
-const NewLineCard = (
-  { selectedLine, lines }: {
-    selectedLine: Signal<number>;
-    lines: Signal<Route[][]>;
-  },
-) => {
+const createAppContext = (lines_: Route[][]) => {
+  const selectedLine = signal(0);
+  const selectedRoute = signal(0);
+  const lines = signal(lines_);
+
+  return ({
+    selectedLine,
+    selectedRoute,
+    lines,
+    currentRoute: computed(() =>
+      lines.value[selectedLine.value][selectedRoute.value]
+    ),
+  });
+};
+
+const AppContext = createContext<ReturnType<typeof createAppContext>>(
+  {} as ReturnType<typeof createAppContext>,
+);
+
+const NewLineCard = () => {
+  const { lines, selectedLine } = useContext(AppContext);
   return (
     <div
       class={`flex items-center justify-center bg-white text-xl font-bold`}
@@ -22,13 +38,8 @@ const NewLineCard = (
   );
 };
 
-const LinePicker = (
-  { selectedLine, selectedRoute, lines }: {
-    selectedLine: Signal<number>;
-    selectedRoute: Signal<number>;
-    lines: Signal<Route[][]>;
-  },
-) => {
+const LinePicker = () => {
+  const { lines, selectedLine, selectedRoute } = useContext(AppContext);
   return (
     <div class="grid grid-cols-8 h-full gap-px bg-black border border-black">
       {lines.value.map((_, i) => (
@@ -44,22 +55,36 @@ const LinePicker = (
           {i + 1}
         </div>
       ))}
-      {lines.value.length < 16 && (
-        <NewLineCard lines={lines} selectedLine={selectedLine} />
-      )}
+      {lines.value.length < 16 && <NewLineCard />}
     </div>
   );
 };
 
-const GradePicker = (
-  { lines, selectedLine, selectedRoute }: {
-    lines: Signal<Route[][]>;
-    selectedLine: Signal<number>;
-    selectedRoute: Signal<number>;
-  },
+const updateCurrentRoute = (
+  { lines, selectedLine, selectedRoute }: ReturnType<typeof createAppContext>,
+  updater: (route: Route) => Partial<Route>,
 ) => {
-  const currentRoute = lines.value[selectedLine.value][selectedRoute.value];
-  if (!currentRoute) {
+  lines.value = lines.value.map((routes, i) =>
+    i === selectedLine.value
+      ? routes.map((route, j) =>
+        j === selectedRoute.value
+          ? {
+            ...route,
+            ...updater(route),
+          }
+          : route
+      )
+      : routes
+  );
+};
+
+const GradePicker = () => {
+  const context = useContext(
+    AppContext,
+  );
+  const { currentRoute } = context;
+
+  if (!currentRoute.value) {
     return null;
   }
   return (
@@ -67,26 +92,17 @@ const GradePicker = (
       {[4, 5, 6, 7].map((n) => (
         <div
           class={`flex items-center justify-center bg-white ${
-            currentRoute.grade.includes(n.toString())
+            currentRoute.value.grade.includes(n.toString())
               ? "bg-gray-300"
               : "bg-white"
           }`}
           onClick={() => {
-            lines.value = lines.value.map((routes, i) =>
-              i === selectedLine.value
-                ? routes.map((route, j) =>
-                  j === selectedRoute.value
-                    ? {
-                      ...route,
-                      grade: route.grade.replace(
-                        /[4567]/g,
-                        n.toString(),
-                      ) as Grade,
-                    }
-                    : route
-                )
-                : routes
-            );
+            updateCurrentRoute(context, (route) => ({
+              grade: route.grade.replace(
+                /[4567]/g,
+                n.toString(),
+              ),
+            }));
           }}
         >
           {n}
@@ -95,24 +111,15 @@ const GradePicker = (
       {["a", "b", "c"].map((l) => (
         <div
           class={`flex items-center justify-center bg-white ${
-            currentRoute.grade.includes(l) ? "bg-gray-300" : "bg-white"
+            currentRoute.value.grade.includes(l) ? "bg-gray-300" : "bg-white"
           }`}
           onClick={() => {
-            lines.value = lines.value.map((routes, i) =>
-              i === selectedLine.value
-                ? routes.map((route, j) =>
-                  j === selectedRoute.value
-                    ? {
-                      ...route,
-                      grade: route.grade.replace(
-                        /[abc]/g,
-                        l,
-                      ) as Grade,
-                    }
-                    : route
-                )
-                : routes
-            );
+            updateCurrentRoute(context, (route) => ({
+              grade: route.grade.replace(
+                /[abc]/g,
+                l,
+              ),
+            }));
           }}
         >
           {l}
@@ -120,23 +127,14 @@ const GradePicker = (
       ))}
       <div
         class={`flex items-center justify-center  ${
-          currentRoute.grade.includes("+") ? "bg-gray-300" : "bg-white"
+          currentRoute.value.grade.includes("+") ? "bg-gray-300" : "bg-white"
         }`}
         onClick={() => {
-          lines.value = lines.value.map((routes, i) =>
-            i === selectedLine.value
-              ? routes.map((route, j) =>
-                j === selectedRoute.value
-                  ? {
-                    ...route,
-                    grade: (route.grade.includes("+")
-                      ? route.grade.replace("+", "")
-                      : `${route.grade}+`) as Grade,
-                  }
-                  : route
-              )
-              : routes
-          );
+          updateCurrentRoute(context, (route) => ({
+            grade: (route.grade.includes("+")
+              ? route.grade.replace("+", "")
+              : `${route.grade}+`),
+          }));
         }}
       >
         +
@@ -145,15 +143,12 @@ const GradePicker = (
   );
 };
 
-const ColorPicker = (
-  { lines, selectedLine, selectedRoute }: {
-    lines: Signal<Route[][]>;
-    selectedLine: Signal<number>;
-    selectedRoute: Signal<number>;
-  },
-) => {
-  const currentRoute = lines.value[selectedLine.value][selectedRoute.value];
-  if (!currentRoute) {
+const ColorPicker = () => {
+  const { lines, selectedLine, selectedRoute, currentRoute } = useContext(
+    AppContext,
+  );
+
+  if (!currentRoute.value) {
     return null;
   }
   return (
@@ -181,14 +176,12 @@ const ColorPicker = (
 };
 
 const RouteCard = (
-  { selectedRoute, selectedLine, lines, route, selected }: {
-    selectedRoute: Signal<number>;
-    selectedLine: Signal<number>;
-    lines: Signal<Route[][]>;
+  { route, selected }: {
     route: Route;
     selected: boolean;
   },
 ) => {
+  const { lines, selectedLine, selectedRoute } = useContext(AppContext);
   return (
     <div
       class={`p-3 h-full ${getBg(route.color)} ${getTextColor(route.color)} ${
@@ -221,42 +214,34 @@ const RouteCard = (
   );
 };
 
-const NewRouteCard = (
-  { selectedRoute, selectedLine, lines }: {
-    selectedRoute: Signal<number>;
-    selectedLine: Signal<number>;
-    lines: Signal<Route[][]>;
-  },
-) => (
-  <div class="p-3 h-full">
-    <div
-      class="text-5xl font-semibold"
-      onClick={() => {
-        lines.value = lines.value.map((routes, i) =>
-          i === selectedLine.value
-            ? [...routes, {
-              grade: "4a",
-              color: "blanc",
-              setAtMonth: "?",
-              setAtYear: new Date().getFullYear().toString(),
-            }]
-            : routes
-        );
-        selectedRoute.value = lines.value[selectedLine.value].length - 1;
-      }}
-    >
-      +
+const NewRouteCard = () => {
+  const { lines, selectedLine, selectedRoute } = useContext(AppContext);
+  return (
+    <div class="p-3 h-full">
+      <div
+        class="text-5xl font-semibold"
+        onClick={() => {
+          lines.value = lines.value.map((routes, i) =>
+            i === selectedLine.value
+              ? [...routes, {
+                grade: "4a",
+                color: "blanc",
+                setAtMonth: "?",
+                setAtYear: new Date().getFullYear().toString(),
+              }]
+              : routes
+          );
+          selectedRoute.value = lines.value[selectedLine.value].length - 1;
+        }}
+      >
+        +
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-const Line = (
-  { selectedRoute, selectedLine, lines }: {
-    selectedRoute: Signal<number>;
-    selectedLine: Signal<number>;
-    lines: Signal<Route[][]>;
-  },
-) => {
+const Line = () => {
+  const { lines, selectedLine, selectedRoute } = useContext(AppContext);
   const routes = lines.value[selectedLine.value];
   return (
     <div class="h-full">
@@ -270,32 +255,20 @@ const Line = (
           <RouteCard
             route={route}
             selected={i === selectedRoute.value}
-            selectedLine={selectedLine}
-            selectedRoute={selectedRoute}
-            lines={lines}
           />
         </div>
       ))}
-      {routes.length < 4 && (
-        <NewRouteCard
-          selectedLine={selectedLine}
-          selectedRoute={selectedRoute}
-          lines={lines}
-        />
-      )}
+      {routes.length < 4 && <NewRouteCard />}
     </div>
   );
 };
 
-const SetAtPicker = (
-  { lines, selectedLine, selectedRoute }: {
-    lines: Signal<Route[][]>;
-    selectedLine: Signal<number>;
-    selectedRoute: Signal<number>;
-  },
-) => {
-  const currentRoute = lines.value[selectedLine.value][selectedRoute.value];
-  if (!currentRoute) {
+const SetAtPicker = () => {
+  const { lines, selectedLine, selectedRoute, currentRoute } = useContext(
+    AppContext,
+  );
+
+  if (!currentRoute.value) {
     return null;
   }
 
@@ -306,7 +279,7 @@ const SetAtPicker = (
       {["Oct", "Avr", "Fev", "?"].map((m) => (
         <div
           class={`flex items-center justify-center ${
-            currentRoute.setAtMonth === m ? "bg-gray-300" : "bg-white"
+            currentRoute.value.setAtMonth === m ? "bg-gray-300" : "bg-white"
           }`}
           onClick={() => {
             lines.value = lines.value.map((routes, i) =>
@@ -329,7 +302,7 @@ const SetAtPicker = (
       {[y, y - 1, y - 2, "vieux"].map((y_) => (
         <div
           class={`flex items-center justify-center bg-white ${
-            currentRoute.setAtYear === y_.toString()
+            currentRoute.value.setAtYear === y_.toString()
               ? "bg-gray-300"
               : "bg-white"
           }`}
@@ -355,15 +328,12 @@ const SetAtPicker = (
   );
 };
 
-const AuthorPicker = (
-  { lines, selectedLine, selectedRoute }: {
-    lines: Signal<Route[][]>;
-    selectedLine: Signal<number>;
-    selectedRoute: Signal<number>;
-  },
-) => {
-  const currentRoute = lines.value[selectedLine.value][selectedRoute.value];
-  if (!currentRoute) {
+const AuthorPicker = () => {
+  const { lines, selectedLine, selectedRoute, currentRoute } = useContext(
+    AppContext,
+  );
+
+  if (!currentRoute.value) {
     return null;
   }
 
@@ -372,7 +342,7 @@ const AuthorPicker = (
       {authors.map((author) => (
         <div
           class={`flex items-center justify-center ${
-            currentRoute.author === author ? "bg-gray-300" : "bg-white"
+            currentRoute.value.author === author ? "bg-gray-300" : "bg-white"
           }`}
           onClick={() => {
             lines.value = lines.value.map((routes, i) =>
@@ -396,63 +366,40 @@ const AuthorPicker = (
   );
 };
 
-export default function Editor({ lines: lines_ }: { lines: Route[][] }) {
-  const selectedLine = useSignal(0);
-  const selectedRoute = useSignal(0);
-  const lines = useSignal(lines_);
+export default function Editor({ lines }: { lines: Route[][] }) {
   return (
-    <div class="h-screen">
-      <div class="h-1/6">
-        <LinePicker
-          selectedLine={selectedLine}
-          selectedRoute={selectedRoute}
-          lines={lines}
-        />
-      </div>
-      <div class="h-5/6 flex">
-        {/* Column1 */}
-        <div class="w-2/6">
-          <Line
-            lines={lines}
-            selectedRoute={selectedRoute}
-            selectedLine={selectedLine}
-          />
+    <AppContext.Provider
+      value={createAppContext(lines)}
+    >
+      <div class="h-screen">
+        <div class="h-1/6">
+          <LinePicker />
         </div>
+        <div class="h-5/6 flex">
+          {/* Column1 */}
+          <div class="w-2/6">
+            <Line />
+          </div>
 
-        {/* Column2 */}
-        <div class="w-3/6">
-          <div class="h-1/3">
-            <GradePicker
-              lines={lines}
-              selectedLine={selectedLine}
-              selectedRoute={selectedRoute}
-            />
+          {/* Column2 */}
+          <div class="w-3/6">
+            <div class="h-1/3">
+              <GradePicker />
+            </div>
+            <div class="h-1/3">
+              <SetAtPicker />
+            </div>
+            <div class="h-1/3">
+              <AuthorPicker />
+            </div>
           </div>
-          <div class="h-1/3">
-            <SetAtPicker
-              lines={lines}
-              selectedLine={selectedLine}
-              selectedRoute={selectedRoute}
-            />
-          </div>
-          <div class="h-1/3">
-            <AuthorPicker
-              lines={lines}
-              selectedLine={selectedLine}
-              selectedRoute={selectedRoute}
-            />
-          </div>
-        </div>
 
-        {/* Column3 */}
-        <div class="w-1/6">
-          <ColorPicker
-            lines={lines}
-            selectedLine={selectedLine}
-            selectedRoute={selectedRoute}
-          />
+          {/* Column3 */}
+          <div class="w-1/6">
+            <ColorPicker />
+          </div>
         </div>
       </div>
-    </div>
+    </AppContext.Provider>
   );
 }
