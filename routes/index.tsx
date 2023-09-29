@@ -5,7 +5,7 @@ export default function Home() {
         Gestion de murs d'escalade
       </div>
       <a
-        href="/mur/picetcol"
+        href="/picetcol/view"
         class="px-4 py-2 border border-black rounded text-center mx-16"
       >
         Pic et col
