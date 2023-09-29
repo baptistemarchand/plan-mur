@@ -3,15 +3,35 @@ import { authors, Grade, Route } from "../types.ts";
 import type { Signal } from "@preact/signals";
 import { useSignal } from "@preact/signals";
 
+const NewLineCard = (
+  { selectedLine, lines }: {
+    selectedLine: Signal<number>;
+    lines: Signal<Route[][]>;
+  },
+) => {
+  return (
+    <div
+      class={`flex items-center justify-center bg-white text-xl font-bold`}
+      onClick={() => {
+        lines.value = [...lines.value, []];
+        selectedLine.value = lines.value.length - 1;
+      }}
+    >
+      +
+    </div>
+  );
+};
+
 const LinePicker = (
-  { selectedLine, selectedRoute }: {
+  { selectedLine, selectedRoute, lines }: {
     selectedLine: Signal<number>;
     selectedRoute: Signal<number>;
+    lines: Signal<Route[][]>;
   },
 ) => {
   return (
     <div class="grid grid-cols-8 h-full gap-px bg-black border border-black">
-      {[...Array(16).keys()].map((i) => (
+      {lines.value.map((_, i) => (
         <div
           class={`flex items-center justify-center bg-white text-xl ${
             selectedLine.value === i ? "bg-gray-300" : ""
@@ -24,6 +44,9 @@ const LinePicker = (
           {i + 1}
         </div>
       ))}
+      {lines.value.length < 16 && (
+        <NewLineCard lines={lines} selectedLine={selectedLine} />
+      )}
     </div>
   );
 };
@@ -380,7 +403,11 @@ export default function Editor({ lines: lines_ }: { lines: Route[][] }) {
   return (
     <div class="h-screen">
       <div class="h-1/6">
-        <LinePicker selectedLine={selectedLine} selectedRoute={selectedRoute} />
+        <LinePicker
+          selectedLine={selectedLine}
+          selectedRoute={selectedRoute}
+          lines={lines}
+        />
       </div>
       <div class="h-5/6 flex">
         {/* Column1 */}

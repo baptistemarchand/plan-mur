@@ -1,5 +1,6 @@
 import { RouteContext } from "$fresh/server.ts";
 import { colors, getBg, getTextColor } from "../../colors.ts";
+import { demo } from "../../demo.ts";
 import { Route } from "../../types.ts";
 
 const Wall = ({ lines }: { lines: Route[][] }) => {
@@ -82,7 +83,7 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
 export default async function Mur(_req: Request, ctx: RouteContext) {
   const kv = await Deno.openKv();
   const result = await kv.get<Route[][]>(["lines", ctx.params.club]);
-  const lines = result.value ?? [];
+  const lines = result.value ?? demo;
 
   return (
     <div>
