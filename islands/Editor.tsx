@@ -522,7 +522,11 @@ const ToRemoveButton = () => {
 
   return (
     <div
-      class="text-xl bg-yellow-500 p-3 text-center font-semibold rounded m-2 text-white mt-4"
+      class={`text-xl ${
+        context.currentRoute.value.toRemove
+          ? "bg-white text-yellow-500"
+          : "bg-yellow-500 text-white"
+      } p-3 text-center font-semibold rounded m-2 mt-4 border-yellow-500 border`}
       onClick={() =>
         updateCurrentRoute(context, (route) => ({
           toRemove: !route.toRemove,
