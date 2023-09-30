@@ -61,7 +61,6 @@ async function createPdf(lines: Route[][]) {
           x: x + WIDTH / 2 - textWidth / 2,
           y: y + HEIGHT / 2 + 35,
           size: fontSize,
-          pdfDoc,
           font: helveticaBold,
           color: getPrintTextColor(route.color),
         });
@@ -74,7 +73,6 @@ async function createPdf(lines: Route[][]) {
             x: x + WIDTH / 2 - textWidth / 2,
             y: y + HEIGHT / 2 - 25,
             size: fontSize,
-            pdfDoc,
             font: helvetica,
             color: textColor,
           });
@@ -86,7 +84,6 @@ async function createPdf(lines: Route[][]) {
             x: x + WIDTH / 2 - textWidth / 2,
             y: y + HEIGHT / 2 - 50,
             size: fontSize,
-            pdfDoc,
             font: helvetica,
             color: textColor,
           });

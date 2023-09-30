@@ -44,7 +44,6 @@ async function createPdf() {
         x: x + WIDTH / 2 - textWidth / 2,
         y: y + HEIGHT / 2 + 35,
         size: fontSize,
-        pdfDoc,
         font: helveticaBold,
         color: getPrintTextColor(color),
       });
