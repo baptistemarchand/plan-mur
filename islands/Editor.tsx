@@ -89,18 +89,21 @@ const createAppContext = (lines_: Route[][], club: string) => {
             lines.value.flatMap((routes) =>
               routes.map((route) => route.author!)
             )
-              .filter(Boolean),
+              .filter(Boolean).filter((author) =>
+                !author.includes("+") && !author.includes("/") &&
+                !author.includes(" ")
+              ).map((x) => x.toLowerCase().trim()),
           ),
-        ].map((x) => x.toLowerCase()).sort(),
+        ].sort(),
     ),
     allSetAts: computed(
       () =>
         [
           ...new Set(
             lines.value.flatMap((routes) => routes.map((route) => route.setAt!))
-              .filter(Boolean),
+              .filter(Boolean).map((x) => x.toLowerCase().trim()),
           ),
-        ].map((x) => x.toLowerCase()).sort(),
+        ].sort(),
     ),
   });
 };
@@ -336,7 +339,7 @@ const SetAtPickerPopup = () => {
           j === selectedRoute.value
             ? {
               ...route,
-              setAt: setAt.toLowerCase(),
+              setAt: setAt.toLowerCase().trim(),
             }
             : route
         )
@@ -439,7 +442,7 @@ const AuthorPickerPopup = () => {
           j === selectedRoute.value
             ? {
               ...route,
-              author: author.toLowerCase(),
+              author: author.toLowerCase().trim(),
             }
             : route
         )
