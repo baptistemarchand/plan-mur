@@ -5,6 +5,10 @@ import { computed, effect, Signal, signal } from "@preact/signals";
 import { useContext } from "preact/hooks";
 import { IS_BROWSER } from "$fresh/runtime.ts";
 import { RouteCard } from "../components/RouteCard.tsx";
+import { Trashcan } from "../components/icons/Trashcan.tsx";
+import { Calendar } from "../components/icons/Calendar.tsx";
+import { Person } from "../components/icons/Person.tsx";
+import { Tools } from "../components/icons/Tools.tsx";
 
 const debounce = <F extends (...args: Parameters<F>) => ReturnType<F>>(
   func: F,
@@ -377,7 +381,7 @@ const SetAtPickerPopup = () => {
             Ajouter
           </button>
           <button
-            class="text-2xl bg-red-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
+            class="text-2xl bg-gray-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
             onClick={() => {
               openSetAtPopup.value = false;
             }}
@@ -401,10 +405,11 @@ const SetAtPicker = () => {
 
   return (
     <div
-      class="text-xl bg-green-500 p-3 text-center font-semibold rounded m-2 text-white mt-4"
+      class="text-xl bg-green-500 p-3 text-center font-semibold rounded m-2 text-white mt-4 flex gap-1 justify-center items-center"
       onClick={() => openSetAtPopup.value = true}
     >
-      Date
+      <Calendar color="#fff" size="30px" />
+      <div>Date</div>
     </div>
   );
 };
@@ -479,7 +484,7 @@ const AuthorPickerPopup = () => {
             Ajouter
           </button>
           <button
-            class="text-2xl bg-red-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
+            class="text-2xl bg-gray-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
             onClick={() => {
               openAuthorPopup.value = false;
             }}
@@ -503,10 +508,11 @@ const AuthorPicker = () => {
 
   return (
     <div
-      class="text-xl bg-blue-500 p-3 text-center font-semibold rounded m-2 text-white mt-4"
+      class="text-xl bg-blue-500 p-3 font-semibold rounded m-2 text-white mt-4 flex justify-center items-center gap-1"
       onClick={() => openAuthorPopup.value = true}
     >
-      Ouvreur.euse
+      <Person color="#fff" size="30px" />
+      <div>Ouvreur.euse</div>
     </div>
   );
 };
@@ -526,13 +532,17 @@ const ToRemoveButton = () => {
         context.currentRoute.value.toRemove
           ? "bg-white text-yellow-500"
           : "bg-yellow-500 text-white"
-      } p-3 text-center font-semibold rounded m-2 mt-4 border-yellow-500 border`}
+      } p-3 font-semibold rounded m-2 mt-4 border-yellow-500 border flex items-center justify-center gap-1`}
       onClick={() =>
         updateCurrentRoute(context, (route) => ({
           toRemove: !route.toRemove,
         }))}
     >
-      À démonter
+      <Tools
+        color={context.currentRoute.value.toRemove ? "#f59e0b" : "#fff"}
+        size="30px"
+      />
+      <div>À démonter</div>
     </div>
   );
 };
@@ -548,7 +558,7 @@ const DeleteButton = () => {
 
   return (
     <div
-      class="text-xl bg-red-500 p-3 text-center font-semibold rounded m-2 text-white mt-4"
+      class="text-xl bg-red-500 p-3 font-semibold rounded m-2 text-white mt-4 flex items-center justify-center gap-1"
       onClick={() => {
         lines.value = lines.value.map((routes, i) =>
           i === selectedLine.value
@@ -558,7 +568,8 @@ const DeleteButton = () => {
         console.log(lines.value[selectedLine.value]);
       }}
     >
-      Supprimer
+      <Trashcan color="#fff" size="30px" />
+      <div>Supprimer</div>
     </div>
   );
 };
