@@ -1,6 +1,9 @@
 import { Route } from "./types.ts";
 
 const kv = await Deno.openKv();
+// const kv = await Deno.openKv(
+//   "https://api.deno.com/databases/4a0e1486-4bdc-4d13-af33-5d9587041906/connect",
+// );
 
 const deleteClub = async (club: string) => {
   await kv.delete(["lines", club]);
@@ -41,4 +44,12 @@ const processAllRoutes = async (club?: string) => {
   }
 };
 
-await processAllRoutes();
+const listClubs = async () => {
+  const entries = kv.list<Route[][]>({ prefix: ["lines"] });
+  for await (const entry of entries) {
+    console.log(entry.key);
+  }
+};
+
+// await processAllRoutes();
+await listClubs();

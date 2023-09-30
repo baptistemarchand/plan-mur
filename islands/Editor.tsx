@@ -170,7 +170,7 @@ const GradePicker = () => {
     return null;
   }
   return (
-    <div class="grid grid-rows-4 grid-flow-col gap-px bg-black h-full text-3xl font-semibold">
+    <div class="grid grid-rows-4 grid-flow-col gap-px bg-black h-full text-4xl font-semibold">
       {[4, 5, 6, 7].map((n) => (
         <div
           class={`flex items-center justify-center ${
