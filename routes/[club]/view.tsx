@@ -90,6 +90,12 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
       >
         EDIT
       </a>
+      <a
+        href={`/${ctx.params.club}/pdf`}
+        class="text-xl border border-black rounded px-4 py-2"
+      >
+        PDF
+      </a>
     </div>
   );
 }

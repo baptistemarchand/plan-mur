@@ -10,6 +10,12 @@ export default function Home() {
       >
         Pic et col
       </a>
+      <a
+        href="/faverges/view"
+        class="px-4 py-2 border border-black rounded text-center mx-16"
+      >
+        Faverges
+      </a>
     </div>
   );
 }
