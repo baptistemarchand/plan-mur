@@ -42,19 +42,31 @@ export const getBg = (color: Color) => {
   return "";
 };
 
+export const isLight = (color: Color) => {
+  return ["blanc", "jaune", "orange", "beige"].includes(color);
+};
+
+export const isDark = (color: Color) => {
+  return ["noir", "bleu", "violet", "rouge", "vert"].includes(color);
+};
+
 export const getTextColor = (color: Color) => {
-  if (color === "noir" || color === "bleu" || color === "violet") {
+  if (isDark(color)) {
     return "text-white";
   }
   return "text-black";
 };
 
 export const getBorderColor = (color: Color) => {
-  if (
-    color === "blanc" || color === "jaune" ||
-    color === "orange" || color === "beige"
-  ) {
+  if (isLight(color)) {
     return "border-black";
   }
   return "border-white";
+};
+
+export const getStripesColor = (color: Color) => {
+  if (color === "noir") {
+    return "rgba(255, 255, 255, 0.4)";
+  }
+  return `rgba(0, 0, 0, ${isDark(color) ? "0.5" : "0.2"})`;
 };

@@ -1,26 +1,19 @@
 import { RouteContext } from "$fresh/server.ts";
 import { colors, getBg, getTextColor } from "../../colors.ts";
+import { RouteCard } from "../../components/RouteCard.tsx";
 import { demo } from "../../demo.ts";
 import { Route } from "../../types.ts";
 
 const Wall = ({ lines }: { lines: Route[][] }) => {
   return (
-    <div class="flex space-x-3 m-8">
+    <div class="flex space-x-2 m-3">
       {lines.map((routes, i) => (
         <div>
           <div class="text-center text-xl mb-2">{i + 1}</div>
           <div class="border border-black">
             {routes.map((route) => (
-              <div
-                class={`p-3 text-center ${getBg(route.color)} ${
-                  getTextColor(route.color)
-                }`}
-              >
-                <div class="text-xl">
-                  {route.grade}
-                </div>
-                <div class="text-xs">{route.setAtMonth} {route.setAtYear}</div>
-                <div class="text-xs">{route.author}</div>
+              <div class="">
+                <RouteCard route={route} variant="small" />
               </div>
             ))}
           </div>

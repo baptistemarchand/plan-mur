@@ -5,7 +5,8 @@
     "start": "deno run --unstable -A --watch=static/,routes/ dev.ts",
     "build": "deno run --unstable -A dev.ts build",
     "preview": "deno run -A main.ts",
-    "update": "deno run -A -r https://fresh.deno.dev/update ."
+    "update": "deno run -A -r https://fresh.deno.dev/update .",
+    "migrate": "deno run --unstable -A migrate.ts"
   },
   "lint": {
     "rules": {

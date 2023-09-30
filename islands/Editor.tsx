@@ -1,9 +1,10 @@
 import { createContext } from "preact";
-import { colors, getBg, getBorderColor, getTextColor } from "../colors.ts";
+import { colors, getBg, getTextColor } from "../colors.ts";
 import { Route } from "../types.ts";
 import { computed, effect, Signal, signal } from "@preact/signals";
 import { useContext } from "preact/hooks";
 import { IS_BROWSER } from "$fresh/runtime.ts";
+import { RouteCard } from "../components/RouteCard.tsx";
 
 const debounce = <F extends (...args: Parameters<F>) => ReturnType<F>>(
   func: F,
@@ -73,6 +74,7 @@ const createAppContext = (lines_: Route[][], club: string) => {
     selectedRoute,
     lines,
     openAuthorPopup: signal(false),
+    openSetAtPopup: signal(false),
     currentRoute: computed(() =>
       lines.value[selectedLine.value][selectedRoute.value]
     ),
@@ -83,6 +85,15 @@ const createAppContext = (lines_: Route[][], club: string) => {
             lines.value.flatMap((routes) =>
               routes.map((route) => route.author!)
             )
+              .filter(Boolean),
+          ),
+        ].map((x) => x.toLowerCase()).sort(),
+    ),
+    allSetAts: computed(
+      () =>
+        [
+          ...new Set(
+            lines.value.flatMap((routes) => routes.map((route) => route.setAt!))
               .filter(Boolean),
           ),
         ].map((x) => x.toLowerCase()).sort(),
@@ -159,7 +170,7 @@ const GradePicker = () => {
     return null;
   }
   return (
-    <div class="grid grid-rows-4 grid-flow-col gap-px bg-black border border-black h-full text-3xl font-semibold">
+    <div class="grid grid-rows-4 grid-flow-col gap-px bg-black h-full text-3xl font-semibold">
       {[4, 5, 6, 7].map((n) => (
         <div
           class={`flex items-center justify-center ${
@@ -223,7 +234,7 @@ const ColorPicker = () => {
     return null;
   }
   return (
-    <div class="grid grid-cols-1 h-full gap-px bg-black border border-black text-xl">
+    <div class="grid grid-cols-1 h-full gap-px bg-black text-xl">
       {colors.map((color) => (
         <div
           class={`flex items-center justify-center bg-white ${getBg(color)} ${
@@ -242,30 +253,6 @@ const ColorPicker = () => {
           {color}
         </div>
       ))}
-    </div>
-  );
-};
-
-const RouteCard = (
-  { route, selected }: {
-    route: Route;
-    selected: boolean;
-  },
-) => {
-  const { lines, selectedLine, selectedRoute } = useContext(AppContext);
-  return (
-    <div
-      class={`p-3 h-full ${getBg(route.color)} ${getTextColor(route.color)} ${
-        selected ? `border-dashed ${getBorderColor(route.color)} border-4` : ""
-      }`}
-    >
-      <div class="text-5xl font-semibold mb-3">{route.grade}</div>
-      <div class="text-xl">
-        {(route.setAtYear !== "vieux" && route.setAtMonth !== "?")
-          ? route.setAtMonth
-          : ""} {route.setAtYear}
-      </div>
-      <div class="text-xl">{route.author}</div>
     </div>
   );
 };
@@ -311,6 +298,7 @@ const Line = () => {
           <RouteCard
             route={route}
             selected={i === selectedRoute.value}
+            variant="big"
           />
         </div>
       ))}
@@ -319,8 +307,91 @@ const Line = () => {
   );
 };
 
+const SetAtPickerPopup = () => {
+  const {
+    lines,
+    selectedLine,
+    selectedRoute,
+    currentRoute,
+    allSetAts,
+    openSetAtPopup,
+  } = useContext(
+    AppContext,
+  );
+
+  if (!currentRoute.value || !openSetAtPopup.value) {
+    return null;
+  }
+
+  const newSetAt = signal("");
+
+  const addSetAt = (setAt: string) => {
+    lines.value = lines.value.map((routes, i) =>
+      i === selectedLine.value
+        ? routes.map((route, j) =>
+          j === selectedRoute.value
+            ? {
+              ...route,
+              setAt: setAt.toLowerCase(),
+            }
+            : route
+        )
+        : routes
+    );
+    openSetAtPopup.value = false;
+  };
+
+  return (
+    <div class="h-full absolute w-full">
+      <div class="grid bg-black grid-rows-5 grid-flow-col gap-px h-4/5 w-full">
+        {allSetAts.value.map((setAt) => (
+          <div
+            class={`flex items-center justify-center ${
+              currentRoute.value.setAt === setAt ? "bg-gray-300" : "bg-white"
+            }`}
+            onClick={() => addSetAt(setAt)}
+          >
+            {setAt}
+          </div>
+        ))}
+      </div>
+      <div class="bg-white flex flex-col h-2/5 border-t border-black pt-4">
+        <input
+          type="text"
+          class="border border-black rounded border-2 text-center mx-8 mt-4 h-10 text-2xl"
+          placeholder="jan 2020"
+          onInput={(
+            e,
+          ) => (newSetAt.value = (e.target as HTMLInputElement).value)}
+        />
+        <div class="mx-auto flex gap-4 bg-white">
+          <button
+            class="text-2xl bg-green-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
+            onClick={() => {
+              if (newSetAt.value) {
+                addSetAt(newSetAt.value);
+                newSetAt.value = "";
+              }
+            }}
+          >
+            Ajouter
+          </button>
+          <button
+            class="text-2xl bg-red-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
+            onClick={() => {
+              openSetAtPopup.value = false;
+            }}
+          >
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const SetAtPicker = () => {
-  const { lines, selectedLine, selectedRoute, currentRoute } = useContext(
+  const { openSetAtPopup, currentRoute } = useContext(
     AppContext,
   );
 
@@ -328,58 +399,12 @@ const SetAtPicker = () => {
     return null;
   }
 
-  const y = new Date().getFullYear();
-
   return (
-    <div class="grid grid-rows-4 grid-flow-col gap-px bg-black border border-black h-full text-2xl">
-      {["Oct", "Avr", "Fev", "?"].map((m) => (
-        <div
-          class={`flex items-center justify-center ${
-            currentRoute.value.setAtMonth === m ? "bg-gray-300" : "bg-white"
-          }`}
-          onClick={() => {
-            lines.value = lines.value.map((routes, i) =>
-              i === selectedLine.value
-                ? routes.map((route, j) =>
-                  j === selectedRoute.value
-                    ? {
-                      ...route,
-                      setAtMonth: m,
-                    }
-                    : route
-                )
-                : routes
-            );
-          }}
-        >
-          {m}
-        </div>
-      ))}
-      {[y, y - 1, y - 2, "vieux"].map((y_) => (
-        <div
-          class={`flex items-center justify-center ${
-            currentRoute.value.setAtYear === y_.toString()
-              ? "bg-gray-300"
-              : "bg-white"
-          }`}
-          onClick={() => {
-            lines.value = lines.value.map((routes, i) =>
-              i === selectedLine.value
-                ? routes.map((route, j) =>
-                  j === selectedRoute.value
-                    ? {
-                      ...route,
-                      setAtYear: y_.toString(),
-                    }
-                    : route
-                )
-                : routes
-            );
-          }}
-        >
-          {y_}
-        </div>
-      ))}
+    <div
+      class="text-xl bg-green-500 p-3 text-center font-semibold rounded m-2 text-white mt-4"
+      onClick={() => openSetAtPopup.value = true}
+    >
+      Date
     </div>
   );
 };
@@ -432,7 +457,7 @@ const AuthorPickerPopup = () => {
           </div>
         ))}
       </div>
-      <div class="bg-white flex flex-col h-1/5 border-t border-black pt-4">
+      <div class="bg-white flex flex-col h-2/5 border-t border-black pt-4">
         <input
           type="text"
           class="border border-black rounded border-2 text-center mx-8 mt-4 h-10 text-2xl"
@@ -486,6 +511,28 @@ const AuthorPicker = () => {
   );
 };
 
+const ToRemoveButton = () => {
+  const context = useContext(
+    AppContext,
+  );
+
+  if (!context.currentRoute.value) {
+    return null;
+  }
+
+  return (
+    <div
+      class="text-xl bg-yellow-500 p-3 text-center font-semibold rounded m-2 text-white mt-4"
+      onClick={() =>
+        updateCurrentRoute(context, (route) => ({
+          toRemove: !route.toRemove,
+        }))}
+    >
+      À démonter
+    </div>
+  );
+};
+
 const DeleteButton = () => {
   const { currentRoute, lines, selectedLine, selectedRoute } = useContext(
     AppContext,
@@ -521,6 +568,7 @@ export default function Editor(
     >
       <div class="h-screen">
         <AuthorPickerPopup />
+        <SetAtPickerPopup />
         <SyncIndicator />
         <div class="h-1/6">
           <LinePicker />
@@ -532,15 +580,14 @@ export default function Editor(
           </div>
 
           {/* Column2 */}
-          <div class="w-3/6">
-            <div class="h-1/3">
+          <div class="w-3/6 border-black border-r border-l">
+            <div class="h-1/2">
               <GradePicker />
             </div>
-            <div class="h-1/3">
+            <div class="h-1/2 border-black border-t">
               <SetAtPicker />
-            </div>
-            <div class="h-1/3">
               <AuthorPicker />
+              <ToRemoveButton />
               <DeleteButton />
             </div>
           </div>
