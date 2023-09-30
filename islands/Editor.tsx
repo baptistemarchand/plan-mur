@@ -581,7 +581,7 @@ export default function Editor(
     <AppContext.Provider
       value={createAppContext(lines, club)}
     >
-      <div class="h-screen">
+      <div class="h-[calc(100dvh)]">
         <AuthorPickerPopup />
         <SetAtPickerPopup />
         <SyncIndicator />
