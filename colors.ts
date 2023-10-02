@@ -76,23 +76,23 @@ export const getStripesColor = (color: Color) => {
 export const getPrintBgColor = (color: Color) => {
   switch (color) {
     case "rouge":
-      return rgb(238 / 255, 22 / 255, 22 / 255);
+      return rgb(187 / 255, 30 / 255, 16 / 255);
     case "beige":
-      return rgb(227 / 255, 192 / 255, 131 / 255);
+      return rgb(198 / 255, 132 / 255, 109 / 255);
     case "bleu":
-      return rgb(25 / 255, 75 / 255, 254 / 255);
+      return rgb(0 / 255, 124 / 255, 176 / 255);
     case "violet":
-      return rgb(156 / 255, 58 / 255, 209 / 255);
+      return rgb(172 / 255, 76 / 255, 130 / 255);
     case "rose":
-      return rgb(255 / 255, 67 / 255, 236 / 255);
+      return rgb(255 / 255, 62 / 255, 181 / 255);
     case "vert":
-      return rgb(40 / 255, 153 / 255, 2 / 255);
+      return rgb(0 / 255, 139 / 255, 41 / 255);
     case "jaune":
-      return rgb(249 / 255, 241 / 255, 4 / 255);
+      return rgb(247 / 255, 181 / 255, 0 / 255);
     case "noir":
       return rgb(0 / 255, 0 / 255, 0 / 255);
     case "orange":
-      return rgb(255 / 255, 149 / 255, 0 / 255);
+      return rgb(246 / 255, 120 / 255, 40 / 255);
     case "gris":
       return rgb(149 / 255, 149 / 255, 149 / 255);
     case "blanc":
