@@ -28,46 +28,109 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
   const allGrades = [4, 5, 6, 7].flatMap((n) =>
     ["a", "b", "c"].map((l) => `${n}${l}`)
   ).filter((g) => g !== "4a" && g !== "7c");
+  const allSetAts = [
+    ...new Set(
+      allRoutes.map((route) => route.setAt).map((x) => x?.trim()),
+    ),
+  ];
+  const allAuthors = [
+    ...new Set(
+      allRoutes.map((route) => route.author).map((x) => x?.trim()).filter(
+        Boolean,
+      ),
+    ),
+  ];
 
   return (
-    <div class="">
-      <div class="text-xl mt-6 ml-3">Par couleur</div>
-      <div class="">
-        {colors.map((color) => (
-          <div
-            class={`flex px-2 py-1`}
-          >
-            {allRoutes.filter((route) => route.color === color).map((r) => (
-              <div
-                class={`text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
-                  getBg(color)
-                } ${getTextColor(color)}`}
-              >
-                {r.grade}
-              </div>
-            ))}
+    <div>
+      <div class="text-xl ml-3">Nombre de voies : {allRoutes.length}</div>
+      <div class="md:flex gap-10 mt-3">
+        <div class="">
+          <div class="text-xl ml-3 font-semibold">Par couleur</div>
+          {colors.map((color) => (
+            <div
+              class={`flex px-2 py-1`}
+            >
+              {allRoutes.filter((route) => route.color === color).map((r) => (
+                <div
+                  class={`text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
+                    getBg(color)
+                  } ${getTextColor(color)}`}
+                >
+                  {r.grade}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div class="">
+          <div class="text-xl ml-3 font-semibold">Par cotation</div>
+          {allGrades.map((grade) => (
+            <div
+              class={`flex px-2 py-1`}
+            >
+              {allRoutes.filter((route) => route.grade.startsWith(grade)).map((
+                r,
+              ) => (
+                <div
+                  class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
+                    getBg(r.color)
+                  } ${getTextColor(r.color)}`}
+                >
+                  {r.grade}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <div class="text-xl ml-3 font-semibold">
+            Par session d'ouverture
           </div>
-        ))}
-      </div>
-      <div class="text-xl mt-6 ml-3">Par cotation</div>
-      <div class="">
-        {allGrades.map((grade) => (
-          <div
-            class={`flex px-2 py-1`}
-          >
-            {allRoutes.filter((route) => route.grade.startsWith(grade)).map((
-              r,
-            ) => (
-              <div
-                class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
-                  getBg(r.color)
-                } ${getTextColor(r.color)}`}
-              >
-                {r.grade}
-              </div>
-            ))}
+          {allSetAts.map((setAt) => (
+            <div
+              class={`flex px-2 py-1`}
+            >
+              <div class="mr-3">{setAt ?? "Inconnue"}</div>
+              {allRoutes.filter((route) => route.setAt === setAt).map((
+                r,
+              ) => (
+                <div
+                  class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
+                    getBg(r.color)
+                  } ${getTextColor(r.color)}`}
+                >
+                  {r.grade}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <div class="text-xl ml-3 font-semibold">
+            Par ouvreur.euse
           </div>
-        ))}
+          {allAuthors.map((author) => (
+            <div
+              class={`flex px-2 py-1`}
+            >
+              <div class="mr-3">{author}</div>
+              {allRoutes.filter((route) => route.author === author).map((
+                r,
+              ) => (
+                <div
+                  class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
+                    getBg(r.color)
+                  } ${getTextColor(r.color)}`}
+                >
+                  {r.grade}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -84,18 +147,20 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
     <div>
       <Wall lines={lines} />
       <Stats lines={lines} />
-      <a
-        href={`/${ctx.params.club}/edit`}
-        class="text-xl border border-black rounded px-4 py-2"
-      >
-        EDIT
-      </a>
-      <a
-        href={`/${ctx.params.club}/pdf`}
-        class="text-xl border border-black rounded px-4 py-2"
-      >
-        PDF
-      </a>
+      <div>
+        <a
+          href={`/${ctx.params.club}/edit`}
+          class="text-xl border border-black rounded px-4 py-2 inline-block ml-2"
+        >
+          EDIT
+        </a>
+        <a
+          href={`/${ctx.params.club}/pdf`}
+          class="text-xl border border-black rounded px-4 py-2 inline-block ml-2"
+        >
+          PDF
+        </a>
+      </div>
     </div>
   );
 }
