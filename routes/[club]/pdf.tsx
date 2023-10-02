@@ -9,6 +9,7 @@ import {
   rgb,
   StandardFonts,
 } from "https://cdn.skypack.dev/pdf-lib@^1.11.1?dts";
+import fontkit from "https://cdn.skypack.dev/@pdf-lib/fontkit@^1.0.0?dts";
 
 const WIDTH = 156;
 const HEIGHT = 241;
@@ -18,9 +19,11 @@ async function createPdf(lines: Route[][]) {
   const routes = lines.flatMap((routes) => routes);
 
   const pdfDoc = await PDFDocument.create();
+  pdfDoc.registerFontkit(fontkit);
 
   const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBytes = await Deno.readFile("./static/garamond.ttf");
+  const garamond = await pdfDoc.embedFont(fontBytes);
 
   for (let i = 0; i < routes.length; i += 9) {
     const chunk = routes.slice(i, i + 9);
@@ -67,24 +70,24 @@ async function createPdf(lines: Route[][]) {
 
         const textColor = rgb(0, 0, 0);
         if (route.setAt) {
-          fontSize = 20;
-          textWidth = helvetica.widthOfTextAtSize(route.setAt, fontSize);
+          fontSize = 25;
+          textWidth = garamond.widthOfTextAtSize(route.setAt, fontSize);
           page.drawText(route.setAt, {
             x: x + WIDTH / 2 - textWidth / 2,
             y: y + HEIGHT / 2 - 25,
             size: fontSize,
-            font: helvetica,
+            font: garamond,
             color: textColor,
           });
         }
         if (route.author) {
           fontSize = 20;
-          textWidth = helvetica.widthOfTextAtSize(route.author, fontSize);
+          textWidth = garamond.widthOfTextAtSize(route.author, fontSize);
           page.drawText(route.author, {
             x: x + WIDTH / 2 - textWidth / 2,
             y: y + HEIGHT / 2 - 50,
             size: fontSize,
-            font: helvetica,
+            font: garamond,
             color: textColor,
           });
         }
