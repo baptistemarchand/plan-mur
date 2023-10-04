@@ -32,14 +32,23 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
     ...new Set(
       allRoutes.map((route) => route.setAt),
     ),
-  ];
+  ].sort((a, b) => {
+    if (!a) {
+      return 1;
+    }
+    if (!b) {
+      return -1;
+    }
+    return parseInt(a.replace(/[^0-9]/g, "")) -
+      parseInt(b.replace(/[^0-9]/g, ""));
+  });
   const allAuthors = [
     ...new Set(
       allRoutes.map((route) => route.author).filter(
         Boolean,
       ),
     ),
-  ];
+  ].sort();
 
   return (
     <div>
