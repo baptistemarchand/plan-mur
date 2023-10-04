@@ -30,12 +30,12 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
   ).filter((g) => g !== "4a" && g !== "7c");
   const allSetAts = [
     ...new Set(
-      allRoutes.map((route) => route.setAt).map((x) => x?.trim()),
+      allRoutes.map((route) => route.setAt),
     ),
   ];
   const allAuthors = [
     ...new Set(
-      allRoutes.map((route) => route.author).map((x) => x?.trim()).filter(
+      allRoutes.map((route) => route.author).filter(
         Boolean,
       ),
     ),

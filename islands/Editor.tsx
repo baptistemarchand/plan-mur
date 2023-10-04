@@ -92,7 +92,7 @@ const createAppContext = (lines_: Route[][], club: string) => {
               .filter(Boolean).filter((author) =>
                 !author.includes("+") && !author.includes("/") &&
                 !author.includes(" ")
-              ).map((x) => x.toLowerCase().trim()),
+              ),
           ),
         ].sort(),
     ),
@@ -101,7 +101,7 @@ const createAppContext = (lines_: Route[][], club: string) => {
         [
           ...new Set(
             lines.value.flatMap((routes) => routes.map((route) => route.setAt!))
-              .filter(Boolean).map((x) => x.toLowerCase().trim()),
+              .filter(Boolean),
           ),
         ].sort(),
     ),

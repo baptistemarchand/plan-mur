@@ -51,5 +51,12 @@ const listClubs = async () => {
   }
 };
 
+const listRoutes = async (club: string) => {
+  const lines = (await kv.get<Route[][]>(["lines", club])).value;
+
+  console.log(lines);
+};
+
 // await processAllRoutes();
-await listClubs();
+// await listClubs();
+await listRoutes("picetcol");
