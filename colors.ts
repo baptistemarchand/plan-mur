@@ -11,6 +11,7 @@ export const colors = [
   "orange",
   "rouge",
   "vert",
+  "vert-fluo",
   "beige",
 ] as const;
 
@@ -30,6 +31,8 @@ export const getBg = (color: Color) => {
       return "bg-rose";
     case "vert":
       return "bg-vert";
+    case "vert-fluo":
+      return "bg-vert-fluo";
     case "jaune":
       return "bg-jaune";
     case "noir":
@@ -45,7 +48,7 @@ export const getBg = (color: Color) => {
 };
 
 export const isLight = (color: Color) => {
-  return ["blanc", "jaune", "orange", "beige"].includes(color);
+  return ["blanc", "jaune", "orange", "beige", "vert-fluo"].includes(color);
 };
 
 export const isDark = (color: Color) => {
@@ -78,21 +81,23 @@ export const getPrintBgColor = (color: Color) => {
     case "rouge":
       return rgb(187 / 255, 30 / 255, 16 / 255);
     case "beige":
-      return rgb(198 / 255, 132 / 255, 109 / 255);
+      return rgb(220 / 255, 150 / 255, 130 / 255);
     case "bleu":
       return rgb(0 / 255, 124 / 255, 176 / 255);
     case "violet":
-      return rgb(172 / 255, 76 / 255, 130 / 255);
+      return rgb(130 / 255, 76 / 255, 172 / 255);
     case "rose":
-      return rgb(255 / 255, 62 / 255, 181 / 255);
+      return rgb(255 / 255, 100 / 255, 170 / 255);
     case "vert":
       return rgb(0 / 255, 139 / 255, 41 / 255);
+    case "vert-fluo":
+      return rgb(64 / 255, 255 / 255, 0 / 255);
     case "jaune":
-      return rgb(247 / 255, 181 / 255, 0 / 255);
+      return rgb(247 / 255, 220 / 255, 0 / 255);
     case "noir":
       return rgb(0 / 255, 0 / 255, 0 / 255);
     case "orange":
-      return rgb(246 / 255, 120 / 255, 40 / 255);
+      return rgb(255 / 255, 160 / 255, 0 / 255);
     case "gris":
       return rgb(149 / 255, 149 / 255, 149 / 255);
     case "blanc":
