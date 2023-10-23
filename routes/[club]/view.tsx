@@ -184,12 +184,14 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
       <Wall lines={lines} />
       <Stats lines={lines} />
       <div>
-        <a
+        {
+          /* <a
           href={`/${ctx.params.club}/edit`}
           class="text-xl border border-black rounded px-4 py-2 inline-block ml-2"
         >
           EDIT
-        </a>
+        </a> */
+        }
         <a
           href={`/${ctx.params.club}/pdf`}
           class="text-xl border border-black rounded px-4 py-2 inline-block ml-2"
