@@ -141,6 +141,33 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
           ))}
         </div>
       </div>
+
+      <div>
+        <div class="text-xl ml-3 font-semibold">
+          À démonter
+        </div>
+        {lines.filter((routes) => routes.some((r) => r.toRemove)).map((
+          routes,
+          i,
+        ) => (
+          <div
+            class={`flex px-2 py-1`}
+          >
+            <div class="mr-3">{i + 1}</div>
+            {routes.filter((route) => route.toRemove).map((
+              r,
+            ) => (
+              <div
+                class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
+                  getBg(r.color)
+                } ${getTextColor(r.color)}`}
+              >
+                {r.grade}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
