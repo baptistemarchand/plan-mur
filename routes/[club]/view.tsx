@@ -56,41 +56,65 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
       <div class="md:flex gap-10 mt-3">
         <div class="">
           <div class="text-xl ml-3 font-semibold">Par couleur</div>
-          {colors.map((color) => (
-            <div
-              class={`flex px-2 py-1`}
-            >
-              {allRoutes.filter((route) => route.color === color).map((r) => (
-                <div
-                  class={`text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
-                    getBg(color)
-                  } ${getTextColor(color)}`}
-                >
-                  {r.grade}
-                </div>
-              ))}
-            </div>
-          ))}
+          {colors.map((color) => {
+            const routes = allRoutes.filter((route) => route.color === color);
+            return (
+              <div
+                class={`flex px-2 py-1`}
+              >
+                {routes.map((r) => (
+                  <div
+                    class={`text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
+                      getBg(color)
+                    } ${getTextColor(color)}`}
+                  >
+                    {r.grade}
+                  </div>
+                ))}
+                {routes.length
+                  ? (
+                    <div class="ml-2">
+                      ({routes.length})
+                    </div>
+                  )
+                  : null}
+              </div>
+            );
+          })}
         </div>
         <div class="">
           <div class="text-xl ml-3 font-semibold">Par cotation</div>
-          {allGrades.map((grade) => (
-            <div
-              class={`flex px-2 py-1`}
-            >
-              {allRoutes.filter((route) => route.grade.startsWith(grade)).map((
-                r,
-              ) => (
-                <div
-                  class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
-                    getBg(r.color)
-                  } ${getTextColor(r.color)}`}
-                >
-                  {r.grade}
-                </div>
-              ))}
-            </div>
-          ))}
+          {allGrades.map((grade) => {
+            const routes = allRoutes.filter((route) =>
+              route.grade.startsWith(grade)
+            );
+            return (
+              <div
+                class={`flex px-2 py-1`}
+              >
+                {routes.map(
+                  (
+                    r,
+                  ) => (
+                    <div
+                      class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
+                        getBg(r.color)
+                      } ${getTextColor(r.color)}`}
+                    >
+                      {r.grade}
+                    </div>
+                  ),
+                )}
+                {routes.length
+                  ? (
+                    <div class="ml-2">
+                      ({routes.length})
+                    </div>
+                  )
+                  : null}
+              </div>
+            );
+          })}
         </div>
 
         <div>
