@@ -73,6 +73,7 @@ const createAppContext = (lines_: Route[][], club: string) => {
   });
 
   return ({
+    club,
     dirtySate,
     selectedLine,
     selectedRoute,
@@ -128,7 +129,7 @@ const NewLineCard = () => {
 };
 
 const LinePicker = () => {
-  const { lines, selectedLine, selectedRoute } = useContext(AppContext);
+  const { lines, selectedLine, selectedRoute, club } = useContext(AppContext);
   return (
     <div class="grid grid-cols-8 h-full gap-px bg-black border border-black">
       {lines.value.map((_, i) => (
@@ -144,7 +145,7 @@ const LinePicker = () => {
           {i + 1}
         </div>
       ))}
-      {lines.value.length < 16 && <NewLineCard />}
+      {lines.value.length < (club === "faverges" ? 24 : 16) && <NewLineCard />}
     </div>
   );
 };
