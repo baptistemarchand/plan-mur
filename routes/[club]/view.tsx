@@ -1,5 +1,5 @@
 import { RouteContext } from "$fresh/server.ts";
-import { colors, getBg, getTextColor } from "../../colors.ts";
+import { getBg, getTextColor } from "../../colors.ts";
 import { RouteCard } from "../../components/RouteCard.tsx";
 import { demo } from "../../demo.ts";
 import { Route } from "../../types.ts";
@@ -23,179 +23,129 @@ const Wall = ({ lines }: { lines: Route[][] }) => {
   );
 };
 
-const Stats = ({ lines }: { lines: Route[][] }) => {
-  const allRoutes = lines.flatMap((line) => line);
-  const allGrades = [4, 5, 6, 7].flatMap((n) =>
-    ["a", "b", "c"].map((l) => `${n}${l}`)
-  ).filter((g) => g !== "4a" && g !== "7c");
-  const allSetAts = [
-    ...new Set(
-      allRoutes.map((route) => route.setAt),
-    ),
-  ].sort((a, b) => {
-    if (!a) {
-      return 1;
+type RouteWithLineIndex = Route & { lineIndex: number };
+
+const Breakdown = (
+  { label, allRoutes, getBucket, getBuckets, sortBy }: {
+    label: string;
+    allRoutes: RouteWithLineIndex[];
+    getBucket?: (r: RouteWithLineIndex) => string;
+    getBuckets?: (r: RouteWithLineIndex) => string[];
+    sortBy?: (
+      [bucket, routes]: [string, RouteWithLineIndex[]],
+    ) => string | number;
+  },
+) => {
+  const routesByBucket: Record<string, RouteWithLineIndex[]> = {};
+  for (const route of allRoutes) {
+    const buckets = getBucket ? [getBucket(route)] : getBuckets!(route);
+    for (const bucket of buckets) {
+      if (!routesByBucket[bucket]) {
+        routesByBucket[bucket] = [];
+      }
+      routesByBucket[bucket].push(route);
     }
-    if (!b) {
-      return -1;
-    }
-    return parseInt(a.replace(/[^0-9]/g, "")) -
-      parseInt(b.replace(/[^0-9]/g, ""));
+  }
+
+  const entries = Object.entries(routesByBucket);
+  entries.sort((a, b) => {
+    const sortKeyA = sortBy?.(a) ?? a[0];
+    const sortKeyB = sortBy?.(b) ?? b[0];
+
+    return (sortKeyA > sortKeyB) ? 1 : ((sortKeyB > sortKeyA) ? -1 : 0);
   });
-  const allAuthors = [
-    ...new Set(
-      allRoutes.map((route) => route.author).filter(
-        Boolean,
-      ),
-    ),
-  ].sort();
+
+  return (
+    <div class="">
+      <div class="text-xl ml-3 mt-4 font-semibold">{label}</div>
+      {entries.map(([bucket, routes]) => {
+        return (
+          <div
+            class={`flex px-2 py-1`}
+          >
+            <div class="mr-3">{bucket}</div>
+            {routes.map((r) => (
+              <div
+                class={`text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
+                  getBg(r.color)
+                } ${getTextColor(r.color)}`}
+              >
+                {r.grade}
+              </div>
+            ))}
+            {routes.length > 1
+              ? (
+                <div class="ml-2">
+                  ({routes.length})
+                </div>
+              )
+              : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const Stats = ({ lines }: { lines: Route[][] }) => {
+  const allRoutes: RouteWithLineIndex[] = lines.flatMap((routes, index) =>
+    routes.map((route) => ({
+      ...route,
+      lineIndex: index,
+    }))
+  );
 
   return (
     <div>
       <div class="text-xl ml-3">Nombre de voies : {allRoutes.length}</div>
+
       <div class="mt-3">
-        <div class="">
-          <div class="text-xl ml-3 mt-4 font-semibold">Par couleur</div>
-          {colors.map((color) => {
-            const routes = allRoutes.filter((route) => route.color === color);
-            return (
-              <div
-                class={`flex px-2 py-1`}
-              >
-                {routes.map((r) => (
-                  <div
-                    class={`text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
-                      getBg(color)
-                    } ${getTextColor(color)}`}
-                  >
-                    {r.grade}
-                  </div>
-                ))}
-                {routes.length
-                  ? (
-                    <div class="ml-2">
-                      ({routes.length})
-                    </div>
-                  )
-                  : null}
-              </div>
-            );
-          })}
-        </div>
-        <div class="">
-          <div class="text-xl ml-3 mt-4 font-semibold">Par cotation</div>
-          {allGrades.map((grade) => {
-            const routes = allRoutes.filter((route) =>
-              route.grade.startsWith(grade)
-            );
-            return (
-              <div
-                class={`flex px-2 py-1`}
-              >
-                {routes.map(
-                  (
-                    r,
-                  ) => (
-                    <div
-                      class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
-                        getBg(r.color)
-                      } ${getTextColor(r.color)}`}
-                    >
-                      {r.grade}
-                    </div>
-                  ),
-                )}
-                {routes.length
-                  ? (
-                    <div class="ml-2">
-                      ({routes.length})
-                    </div>
-                  )
-                  : null}
-              </div>
-            );
-          })}
-        </div>
+        <Breakdown
+          label="Par couleur"
+          allRoutes={allRoutes}
+          getBucket={(r) => r.color}
+          sortBy={([, routes]) => -routes.length}
+        />
+        <Breakdown
+          label="Par cotation"
+          allRoutes={allRoutes}
+          getBucket={(r) => r.grade.replace("+", "")}
+        />
+        <Breakdown
+          label="Par session d'ouverture"
+          allRoutes={allRoutes}
+          getBucket={(r) => r.setAt ?? "Inconnue"}
+          sortBy={([bucket]) =>
+            bucket === "Inconnue"
+              ? -Infinity
+              : parseInt(bucket.replace(/[^0-9]/g, ""))}
+        />
+        <Breakdown
+          label="Par ouvreur.euse"
+          allRoutes={allRoutes.filter((r) => r.author)}
+          getBuckets={({ author }) => {
+            if (!author) {
+              throw Error("No author");
+            }
+            const authors = (() => {
+              if (author.includes("&")) {
+                return author.split("&");
+              }
+              if (author.includes("+")) {
+                return author.split("+");
+              }
+              return [author];
+            })();
 
-        <div>
-          <div class="text-xl ml-3 mt-4 font-semibold">
-            Par session d'ouverture
-          </div>
-          {allSetAts.map((setAt) => {
-            const routes = allRoutes.filter((route) => route.setAt === setAt);
-            return (
-              <div
-                class={`flex px-2 py-1`}
-              >
-                <div class="mr-3">{setAt ?? "Inconnue"}</div>
-                {routes.map((
-                  r,
-                ) => (
-                  <div
-                    class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
-                      getBg(r.color)
-                    } ${getTextColor(r.color)}`}
-                  >
-                    {r.grade}
-                  </div>
-                ))}
-                <div class="ml-2">
-                  ({routes.length})
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div>
-          <div class="text-xl ml-3 mt-4 font-semibold">
-            Par ouvreur.euse
-          </div>
-          {allAuthors.map((author) => (
-            <div
-              class={`flex px-2 py-1`}
-            >
-              <div class="mr-3">{author}</div>
-              {allRoutes.filter((route) => route.author === author).map((
-                r,
-              ) => (
-                <div
-                  class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
-                    getBg(r.color)
-                  } ${getTextColor(r.color)}`}
-                >
-                  {r.grade}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <div class="text-xl ml-3 mt-4 font-semibold">
-          À démonter
-        </div>
-        {lines.map((routes, i) =>
-          routes.some((r) => r.toRemove) && (
-            <div
-              class={`flex px-2 py-1`}
-            >
-              <div class="mr-3">{i + 1}</div>
-              {routes.filter((route) => route.toRemove).map((
-                r,
-              ) => (
-                <div
-                  class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
-                    getBg(r.color)
-                  } ${getTextColor(r.color)}`}
-                >
-                  {r.grade}
-                </div>
-              ))}
-            </div>
-          )
-        )}
+            return authors.map((a) => a.trim());
+          }}
+        />
+        <Breakdown
+          label="À démonter"
+          allRoutes={allRoutes.filter((r) => r.toRemove)}
+          getBucket={(r) => `ligne ${r.lineIndex + 1}`}
+          sortBy={([, routes]) => routes[0].lineIndex}
+        />
       </div>
     </div>
   );
