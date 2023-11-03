@@ -53,9 +53,9 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
   return (
     <div>
       <div class="text-xl ml-3">Nombre de voies : {allRoutes.length}</div>
-      <div class="md:flex gap-10 mt-3">
+      <div class="mt-3">
         <div class="">
-          <div class="text-xl ml-3 font-semibold">Par couleur</div>
+          <div class="text-xl ml-3 mt-4 font-semibold">Par couleur</div>
           {colors.map((color) => {
             const routes = allRoutes.filter((route) => route.color === color);
             return (
@@ -83,7 +83,7 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
           })}
         </div>
         <div class="">
-          <div class="text-xl ml-3 font-semibold">Par cotation</div>
+          <div class="text-xl ml-3 mt-4 font-semibold">Par cotation</div>
           {allGrades.map((grade) => {
             const routes = allRoutes.filter((route) =>
               route.grade.startsWith(grade)
@@ -118,31 +118,37 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
         </div>
 
         <div>
-          <div class="text-xl ml-3 font-semibold">
+          <div class="text-xl ml-3 mt-4 font-semibold">
             Par session d'ouverture
           </div>
-          {allSetAts.map((setAt) => (
-            <div
-              class={`flex px-2 py-1`}
-            >
-              <div class="mr-3">{setAt ?? "Inconnue"}</div>
-              {allRoutes.filter((route) => route.setAt === setAt).map((
-                r,
-              ) => (
-                <div
-                  class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
-                    getBg(r.color)
-                  } ${getTextColor(r.color)}`}
-                >
-                  {r.grade}
+          {allSetAts.map((setAt) => {
+            const routes = allRoutes.filter((route) => route.setAt === setAt);
+            return (
+              <div
+                class={`flex px-2 py-1`}
+              >
+                <div class="mr-3">{setAt ?? "Inconnue"}</div>
+                {routes.map((
+                  r,
+                ) => (
+                  <div
+                    class={`text-xs border border-black ml-1 rounded w-7 h-7 flex justify-center items-center ${
+                      getBg(r.color)
+                    } ${getTextColor(r.color)}`}
+                  >
+                    {r.grade}
+                  </div>
+                ))}
+                <div class="ml-2">
+                  ({routes.length})
                 </div>
-              ))}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
 
         <div>
-          <div class="text-xl ml-3 font-semibold">
+          <div class="text-xl ml-3 mt-4 font-semibold">
             Par ouvreur.euse
           </div>
           {allAuthors.map((author) => (
@@ -167,7 +173,7 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
       </div>
 
       <div>
-        <div class="text-xl ml-3 font-semibold">
+        <div class="text-xl ml-3 mt-4 font-semibold">
           À démonter
         </div>
         {lines.map((routes, i) =>
