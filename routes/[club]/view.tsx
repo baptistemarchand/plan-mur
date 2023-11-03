@@ -26,9 +26,10 @@ const Wall = ({ lines }: { lines: Route[][] }) => {
 type RouteWithLineIndex = Route & { lineIndex: number };
 
 const Breakdown = (
-  { label, allRoutes, getBucket, getBuckets, sortBy }: {
+  { label, allRoutes, getBucket, getBuckets, sortBy, showTotal }: {
     label: string;
     allRoutes: RouteWithLineIndex[];
+    showTotal?: true;
     getBucket?: (r: RouteWithLineIndex) => string;
     getBuckets?: (r: RouteWithLineIndex) => string[];
     sortBy?: (
@@ -57,7 +58,10 @@ const Breakdown = (
 
   return (
     <div class="">
-      <div class="text-xl ml-3 mt-4 font-semibold">{label}</div>
+      <div class="text-xl ml-3 mt-4 font-semibold">
+        {label}
+        {showTotal ? ` (${allRoutes.length})` : ""}
+      </div>
       {entries.map(([bucket, routes]) => {
         return (
           <div
@@ -143,6 +147,7 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
         />
         <Breakdown
           label="À démonter"
+          showTotal={true}
           allRoutes={allRoutes.filter((r) => r.toRemove)}
           getBucket={(r) => `ligne ${r.lineIndex + 1}`}
           sortBy={([, routes]) => routes[0].lineIndex}
