@@ -123,6 +123,7 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
         <Breakdown
           label="Par ouvreur.euse"
           allRoutes={allRoutes.filter((r) => r.author)}
+          sortBy={([, routes]) => -routes.length}
           getBuckets={({ author }) => {
             if (!author) {
               throw Error("No author");
