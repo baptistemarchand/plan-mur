@@ -1,16 +1,10 @@
 import { RouteContext } from "$fresh/server.ts";
-import { demo } from "../../demo.ts";
-import Editor from "../../islands/Editor.tsx";
-import { Route } from "../../types.ts";
 
-export default async function Mur(_req: Request, ctx: RouteContext) {
-  const kv = await Deno.openKv();
-  const result = await kv.get<Route[][]>(["lines", ctx.params.club]);
-  const lines = result.value ?? demo;
-
+export default function Mur(_req: Request, ctx: RouteContext) {
   return (
     <div>
-      <Editor lines={lines} club={ctx.params.club} />
+      Pas disponible pour le moment. Pour faire des changements, demander à
+      Baptiste !
     </div>
   );
 }
