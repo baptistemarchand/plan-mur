@@ -3,16 +3,17 @@ import { getBg, getTextColor } from "../../colors.ts";
 import { RouteCard } from "../../components/RouteCard.tsx";
 import { demo } from "../../demo.ts";
 import { Route } from "../../types.ts";
+import { getAuthors } from "../../utils.ts";
 
 const Wall = ({ lines }: { lines: Route[][] }) => {
   return (
-    <div class="flex space-x-2 m-3">
+    <div class="flex space-x-1 ml-1">
       {lines.map((routes, i) => (
         <div>
           <div class="text-center text-xl mb-2">{i + 1}</div>
           <div class="border border-black">
             {routes.map((route) => (
-              <div class="">
+              <div class="w-24 h-28">
                 <RouteCard route={route} variant="small" />
               </div>
             ))}
@@ -128,22 +129,7 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
           label="Par ouvreur.euse"
           allRoutes={allRoutes.filter((r) => r.author)}
           sortBy={([, routes]) => -routes.length}
-          getBuckets={({ author }) => {
-            if (!author) {
-              throw Error("No author");
-            }
-            const authors = (() => {
-              if (author.includes("&")) {
-                return author.split("&");
-              }
-              if (author.includes("+")) {
-                return author.split("+");
-              }
-              return [author];
-            })();
-
-            return authors.map((a) => a.trim());
-          }}
+          getBuckets={(route) => getAuthors(route).map((a) => a.trim())}
         />
         <Breakdown
           label="À démonter"

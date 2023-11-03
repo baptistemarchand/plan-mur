@@ -11,7 +11,7 @@ export default {
         violet: "#9c3ad1",
         rose: "#ff43ec",
         vert: "#228900",
-        "vert-fluo": "#40ff00",
+        "vert-2": "#40ff00",
         jaune: "#f9f104",
         noir: "#000",
         orange: "#ff9500",

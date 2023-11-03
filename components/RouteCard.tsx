@@ -5,6 +5,7 @@ import {
   getTextColor,
 } from "../colors.ts";
 import { Route } from "../types.ts";
+import { getAuthors } from "../utils.ts";
 
 export const RouteCard = (
   { route, selected, variant }: {
@@ -18,9 +19,11 @@ export const RouteCard = (
   const gradeSize = big ? "text-5xl" : "text-2xl";
   const textSize = big ? "text-xl font-semibold" : "";
 
+  const authors = getAuthors(route);
+
   return (
     <div
-      class={`p-3 h-full ${getBg(route.color)} ${getTextColor(route.color)} ${
+      class={`p-2 h-full ${getBg(route.color)} ${getTextColor(route.color)} ${
         selected ? `border-dashed ${getBorderColor(route.color)} border-4` : ""
       }`}
       style={route.toRemove
@@ -33,13 +36,13 @@ export const RouteCard = (
         );`
         : ""}
     >
-      <div class={`${gradeSize} font-semibold mb-3`}>
+      <div class={`${gradeSize} font-semibold`}>
         {route.grade}
       </div>
       <div class={`${textSize}`}>
         {route.setAt}
       </div>
-      <div class={`${textSize}`}>{route.author}</div>
+      {authors.map((author) => <div class={`${textSize}`}>{author}</div>)}
     </div>
   );
 };

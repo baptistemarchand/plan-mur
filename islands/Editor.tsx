@@ -92,7 +92,7 @@ const createAppContext = (lines_: Route[][], club: string) => {
             )
               .filter(Boolean).filter((author) =>
                 !author.includes("+") && !author.includes("/") &&
-                !author.includes(" ")
+                !author.includes("&")
               ),
           ),
         ].sort(),

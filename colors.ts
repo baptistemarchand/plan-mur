@@ -11,7 +11,7 @@ export const colors = [
   "orange",
   "rouge",
   "vert",
-  "vert-fluo",
+  "vert-2",
   "beige",
 ] as const;
 
@@ -31,8 +31,8 @@ export const getBg = (color: Color) => {
       return "bg-rose";
     case "vert":
       return "bg-vert";
-    case "vert-fluo":
-      return "bg-vert-fluo";
+    case "vert-2":
+      return "bg-vert-2";
     case "jaune":
       return "bg-jaune";
     case "noir":
@@ -48,7 +48,7 @@ export const getBg = (color: Color) => {
 };
 
 export const isLight = (color: Color) => {
-  return ["blanc", "jaune", "orange", "beige", "vert-fluo"].includes(color);
+  return ["blanc", "jaune", "orange", "beige", "vert-2"].includes(color);
 };
 
 export const isDark = (color: Color) => {
@@ -90,7 +90,7 @@ export const getPrintBgColor = (color: Color) => {
       return rgb(255 / 255, 100 / 255, 170 / 255);
     case "vert":
       return rgb(0 / 255, 139 / 255, 41 / 255);
-    case "vert-fluo":
+    case "vert-2":
       return rgb(64 / 255, 255 / 255, 0 / 255);
     case "jaune":
       return rgb(247 / 255, 220 / 255, 0 / 255);
