@@ -298,7 +298,7 @@ const Line = () => {
     <div class="h-full">
       {routes.map((route, i) => (
         <div
-          class="h-1/4"
+          class="h-1/5"
           onClick={() => {
             selectedRoute.value = i;
           }}
@@ -310,7 +310,7 @@ const Line = () => {
           />
         </div>
       ))}
-      {routes.length < 4 && <NewRouteCard />}
+      {routes.length < 5 && <NewRouteCard />}
     </div>
   );
 };
