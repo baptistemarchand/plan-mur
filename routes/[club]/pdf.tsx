@@ -16,7 +16,9 @@ const HEIGHT = 241;
 
 // Create a new PDF document with one page and some text
 async function createPdf(lines: Route[][]) {
-  const routes = lines.flatMap((routes) => routes);
+  const routes = lines.flatMap((routes) => routes).filter((r) =>
+    r.setAt === "2023 oct"
+  );
 
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
@@ -69,6 +71,11 @@ async function createPdf(lines: Route[][]) {
         });
 
         const textColor = rgb(0, 0, 0);
+        page.drawLine({
+          start: { x, y: y + HEIGHT / 2 },
+          end: { x: x + WIDTH, y: y + HEIGHT / 2 },
+          color: rgb(0, 0, 0),
+        });
         if (route.setAt) {
           fontSize = 25;
           textWidth = garamond.widthOfTextAtSize(route.setAt, fontSize);
