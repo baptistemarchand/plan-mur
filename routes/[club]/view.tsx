@@ -114,7 +114,8 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
         <Breakdown
           label="Par cotation"
           allRoutes={allRoutes}
-          getBucket={(r) => r.grade.replace("+", "")}
+          getBucket={(r) =>
+            r.grade.includes("4") ? "4" : r.grade.replace("+", "")}
         />
         <Breakdown
           label="Par session d'ouverture"
