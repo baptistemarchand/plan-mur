@@ -1,5 +1,5 @@
 import { RouteContext } from "$fresh/server.ts";
-import { getBg, getTextColor } from "../../colors.ts";
+import { Color, colors, getBg, getTextColor } from "../../colors.ts";
 import { RouteCard } from "../../components/RouteCard.tsx";
 import { demo } from "../../demo.ts";
 import { Route } from "../../types.ts";
@@ -58,15 +58,15 @@ const Breakdown = (
   });
 
   return (
-    <div class="">
-      <div class="text-xl ml-3 mt-4 font-semibold">
+    <div class="ml-3 mt-4">
+      <div class="text-xl font-semibold">
         {label}
         {showTotal ? ` (${allRoutes.length})` : ""}
       </div>
       {entries.map(([bucket, routes]) => {
         return (
           <div
-            class={`flex px-2 py-1`}
+            class={`flex py-1`}
           >
             <div class="mr-3">{bucket}</div>
             {routes.map((r) => (
@@ -144,6 +144,57 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
   );
 };
 
+const Suggestions = ({ lines }: { lines: Route[][] }) => {
+  const isAvailable = (color: Color, lineIndex: number): boolean => {
+    if (lineIndex < 0 || lineIndex >= lines.length) {
+      return true;
+    }
+    return lines[lineIndex].every((route) =>
+      route.color !== color || route.toRemove
+    );
+  };
+  const canSet = (color: Color, lineIndex: number) => {
+    return isAvailable(color, lineIndex) && isAvailable(color, lineIndex - 1) &&
+      isAvailable(color, lineIndex + 1);
+  };
+
+  const suggestions: Partial<Record<Color, number[]>> = {};
+
+  for (const color of colors) {
+    for (let i = 0; i < lines.length; i++) {
+      if (canSet(color, i)) {
+        if (!suggestions[color]) {
+          suggestions[color] = [];
+        }
+        suggestions[color]!.push(i + 1);
+      }
+    }
+  }
+
+  return (
+    <div class="ml-3 mt-4">
+      <div class="text-xl font-semibold">
+        Possibilités d'ouverture
+      </div>
+      <div>
+        (Part du principe que les voies marquées "à démonter" sont démontées)
+      </div>
+      {Object.entries(suggestions).map(([color, indexes]) => (
+        <div class="flex mt-1">
+          <div
+            class={`border border-black mr-2 px-2 rounded ${
+              getBg(color as Color)
+            } ${getTextColor(color as Color)}`}
+          >
+            {color}
+          </div>
+          {indexes.join(", ")}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export default async function Mur(_req: Request, ctx: RouteContext) {
   const kv = await Deno.openKv();
   const result = await kv.get<Route[][]>(["lines", ctx.params.club], {
@@ -155,6 +206,7 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
     <div>
       <Wall lines={lines} />
       <Stats lines={lines} />
+      <Suggestions lines={lines} />
       <div>
         {
           /* <a
@@ -166,7 +218,7 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
         }
         <a
           href={`/${ctx.params.club}/pdf`}
-          class="text-xl border border-black rounded px-4 py-2 inline-block ml-2"
+          class="text-xl border border-black rounded px-4 py-2 inline-block ml-2 my-3"
         >
           PDF
         </a>
