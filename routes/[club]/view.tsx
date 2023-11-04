@@ -154,6 +154,9 @@ const Suggestions = ({ lines }: { lines: Route[][] }) => {
     );
   };
   const canSet = (color: Color, lineIndex: number) => {
+    if (lines[lineIndex].filter((r) => !r.toRemove).length >= 4) {
+      return false;
+    }
     return isAvailable(color, lineIndex) && isAvailable(color, lineIndex - 1) &&
       isAvailable(color, lineIndex + 1);
   };
@@ -175,6 +178,15 @@ const Suggestions = ({ lines }: { lines: Route[][] }) => {
     <div class="ml-3 mt-4">
       <div class="text-xl font-semibold">
         Possibilités d'ouverture
+      </div>
+      <div>
+        Contraintes :
+        <ul>
+          <li>
+            - ne pas avoir des voies de meme couleur dans deux lignes adjacentes
+          </li>
+          <li>- 4 voies max par ligne</li>
+        </ul>
       </div>
       <div>
         (Part du principe que les voies marquées "à démonter" sont démontées)
