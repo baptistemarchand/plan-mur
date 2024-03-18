@@ -17,7 +17,8 @@ const HEIGHT = 241;
 // Create a new PDF document with one page and some text
 async function createPdf(lines: Route[][]) {
   const routes = lines.flatMap((routes) => routes).filter((r) =>
-    r.setAt === "2023 oct"
+    // r.setAt === "2024 fev"
+    true
   );
 
   const pdfDoc = await PDFDocument.create();
