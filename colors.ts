@@ -1,4 +1,6 @@
-import { rgb } from "https://cdn.skypack.dev/pdf-lib@^1.11.1?dts";
+// import { rgb } from "https://cdn.skypack.dev/pdf-lib@^1.11.1?dts";
+
+const rgb: any = 0;
 
 export const colors = [
   "blanc",

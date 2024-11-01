@@ -2,33 +2,34 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
-import * as $0 from "./routes/[club]/edit.tsx";
-import * as $1 from "./routes/[club]/edit2.tsx";
-import * as $2 from "./routes/[club]/pdf.tsx";
-import * as $3 from "./routes/[club]/view.tsx";
-import * as $4 from "./routes/_404.tsx";
-import * as $5 from "./routes/_app.tsx";
-import * as $6 from "./routes/api/sync.ts";
-import * as $7 from "./routes/index.tsx";
-import * as $8 from "./routes/pdf-test.tsx";
-import * as $$0 from "./islands/Editor.tsx";
+import * as $_club_edit from "./routes/[club]/edit.tsx";
+import * as $_club_edit2 from "./routes/[club]/edit2.tsx";
+import * as $_club_pdf from "./routes/[club]/pdf.tsx";
+import * as $_club_view from "./routes/[club]/view.tsx";
+import * as $_404 from "./routes/_404.tsx";
+import * as $_app from "./routes/_app.tsx";
+import * as $api_sync from "./routes/api/sync.ts";
+import * as $index from "./routes/index.tsx";
+import * as $pdf_test from "./routes/pdf-test.tsx";
+import * as $Editor from "./islands/Editor.tsx";
+import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
-    "./routes/[club]/edit.tsx": $0,
-    "./routes/[club]/edit2.tsx": $1,
-    "./routes/[club]/pdf.tsx": $2,
-    "./routes/[club]/view.tsx": $3,
-    "./routes/_404.tsx": $4,
-    "./routes/_app.tsx": $5,
-    "./routes/api/sync.ts": $6,
-    "./routes/index.tsx": $7,
-    "./routes/pdf-test.tsx": $8,
+    "./routes/[club]/edit.tsx": $_club_edit,
+    "./routes/[club]/edit2.tsx": $_club_edit2,
+    "./routes/[club]/pdf.tsx": $_club_pdf,
+    "./routes/[club]/view.tsx": $_club_view,
+    "./routes/_404.tsx": $_404,
+    "./routes/_app.tsx": $_app,
+    "./routes/api/sync.ts": $api_sync,
+    "./routes/index.tsx": $index,
+    "./routes/pdf-test.tsx": $pdf_test,
   },
   islands: {
-    "./islands/Editor.tsx": $$0,
+    "./islands/Editor.tsx": $Editor,
   },
   baseUrl: import.meta.url,
-};
+} satisfies Manifest;
 
 export default manifest;

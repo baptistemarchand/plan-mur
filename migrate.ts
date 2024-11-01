@@ -1,4 +1,5 @@
 import { Route } from "./types.ts";
+import { nanoid } from "./utils.ts";
 
 const kv = await Deno.openKv();
 // const kv = await Deno.openKv(
@@ -12,16 +13,16 @@ const deleteClub = async (club: string) => {
 const processRoute = (route: Route): Route => {
   return ({
     ...route,
-    setAt: route.setAt?.toLowerCase(),
+    id: nanoid(),
   });
 };
 
 const processClub = async (club: string, lines: Route[][]) => {
-  for (const routes of lines) {
-    for (const route of routes) {
-      route.author = route.author?.toLowerCase();
-    }
-  }
+  // for (const routes of lines) {
+  //   for (const route of routes) {
+  //     route.author = route.author?.toLowerCase();
+  //   }
+  // }
   const newLines = lines.map((routes) => routes.map(processRoute));
   // console.log(newLines);
   await kv.set(["lines", club], newLines);

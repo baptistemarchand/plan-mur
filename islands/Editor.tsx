@@ -9,6 +9,7 @@ import { Trashcan } from "../components/icons/Trashcan.tsx";
 import { Calendar } from "../components/icons/Calendar.tsx";
 import { Person } from "../components/icons/Person.tsx";
 import { Tools } from "../components/icons/Tools.tsx";
+import { nanoid } from "../utils.ts";
 
 const debounce = <F extends (...args: Parameters<F>) => ReturnType<F>>(
   func: F,
@@ -61,9 +62,13 @@ const SyncIndicator = () => {
   return <div class={`${color} h-1`}></div>;
 };
 
+const getFirstRouteId = (line: Route[]) => {
+  return line.find((route) => !route.deleted)!.id;
+};
+
 const createAppContext = (lines_: Route[][], club: string) => {
   const selectedLine = signal(0);
-  const selectedRoute = signal(0);
+  const selectedRouteId = signal(getFirstRouteId(lines_[0]));
   const lines = signal(lines_);
   const dirtySate = signal<DirtyState>("SYNCED");
 
@@ -76,12 +81,14 @@ const createAppContext = (lines_: Route[][], club: string) => {
     club,
     dirtySate,
     selectedLine,
-    selectedRoute,
+    selectedRouteId,
     lines,
     openAuthorPopup: signal(false),
     openSetAtPopup: signal(false),
     currentRoute: computed(() =>
-      lines.value[selectedLine.value][selectedRoute.value]
+      lines.value[selectedLine.value].find((route) =>
+        route.id === selectedRouteId.value
+      )!
     ),
     allAuthors: computed(
       () =>
@@ -129,17 +136,17 @@ const NewLineCard = () => {
 };
 
 const LinePicker = () => {
-  const { lines, selectedLine, selectedRoute, club } = useContext(AppContext);
+  const { lines, selectedLine, selectedRouteId, club } = useContext(AppContext);
   return (
     <div class="grid grid-cols-8 h-full gap-px bg-black border border-black">
-      {lines.value.map((_, i) => (
+      {lines.value.map((line, i) => (
         <div
           class={`flex items-center justify-center text-xl ${
             selectedLine.value === i ? "bg-gray-300" : "bg-white"
           }`}
           onClick={() => {
             selectedLine.value = i;
-            selectedRoute.value = 0;
+            selectedRouteId.value = getFirstRouteId(line);
           }}
         >
           {i + 1}
@@ -151,13 +158,13 @@ const LinePicker = () => {
 };
 
 const updateCurrentRoute = (
-  { lines, selectedLine, selectedRoute }: ReturnType<typeof createAppContext>,
+  { lines, selectedLine, selectedRouteId }: ReturnType<typeof createAppContext>,
   updater: (route: Route) => Partial<Route>,
 ) => {
   lines.value = lines.value.map((routes, i) =>
     i === selectedLine.value
-      ? routes.map((route, j) =>
-        j === selectedRoute.value
+      ? routes.map((route) =>
+        route.id === selectedRouteId.value
           ? {
             ...route,
             ...updater(route),
@@ -234,7 +241,7 @@ const GradePicker = () => {
 };
 
 const ColorPicker = () => {
-  const { lines, selectedLine, selectedRoute, currentRoute } = useContext(
+  const { lines, selectedLine, selectedRouteId, currentRoute } = useContext(
     AppContext,
   );
 
@@ -251,8 +258,10 @@ const ColorPicker = () => {
           onClick={() => {
             lines.value = lines.value.map((routes, i) =>
               i === selectedLine.value
-                ? routes.map((route, j) =>
-                  j === selectedRoute.value ? { ...route, color } : route
+                ? routes.map((route) =>
+                  route.id === selectedRouteId.value
+                    ? { ...route, color }
+                    : route
                 )
                 : routes
             );
@@ -266,15 +275,17 @@ const ColorPicker = () => {
 };
 
 const NewRouteCard = () => {
-  const { lines, selectedLine, selectedRoute } = useContext(AppContext);
+  const { lines, selectedLine, selectedRouteId } = useContext(AppContext);
   return (
     <div class="p-3 h-full">
       <div
         class="text-5xl font-semibold"
         onClick={() => {
+          const newId = nanoid();
           lines.value = lines.value.map((routes, i) =>
             i === selectedLine.value
               ? [...routes, {
+                id: newId,
                 grade: "4a",
                 color: "blanc",
                 setAtMonth: "?",
@@ -282,7 +293,7 @@ const NewRouteCard = () => {
               }]
               : routes
           );
-          selectedRoute.value = lines.value[selectedLine.value].length - 1;
+          selectedRouteId.value = newId;
         }}
       >
         +
@@ -292,20 +303,22 @@ const NewRouteCard = () => {
 };
 
 const Line = () => {
-  const { lines, selectedLine, selectedRoute } = useContext(AppContext);
-  const routes = lines.value[selectedLine.value];
+  const { lines, selectedLine, selectedRouteId } = useContext(AppContext);
+  const routes = lines.value[selectedLine.value].filter((route) =>
+    !route.deleted
+  );
   return (
     <div class="h-full">
-      {routes.map((route, i) => (
+      {routes.map((route) => (
         <div
           class="h-1/5"
           onClick={() => {
-            selectedRoute.value = i;
+            selectedRouteId.value = route.id;
           }}
         >
           <RouteCard
             route={route}
-            selected={i === selectedRoute.value}
+            selected={route.id === selectedRouteId.value}
             variant="big"
           />
         </div>
@@ -319,7 +332,7 @@ const SetAtPickerPopup = () => {
   const {
     lines,
     selectedLine,
-    selectedRoute,
+    selectedRouteId,
     currentRoute,
     allSetAts,
     openSetAtPopup,
@@ -336,8 +349,8 @@ const SetAtPickerPopup = () => {
   const addSetAt = (setAt: string) => {
     lines.value = lines.value.map((routes, i) =>
       i === selectedLine.value
-        ? routes.map((route, j) =>
-          j === selectedRoute.value
+        ? routes.map((route) =>
+          route.id === selectedRouteId.value
             ? {
               ...route,
               setAt: setAt.toLowerCase().trim(),
@@ -422,7 +435,7 @@ const AuthorPickerPopup = () => {
   const {
     lines,
     selectedLine,
-    selectedRoute,
+    selectedRouteId,
     currentRoute,
     allAuthors,
     openAuthorPopup,
@@ -439,8 +452,8 @@ const AuthorPickerPopup = () => {
   const addAuthor = (author: string) => {
     lines.value = lines.value.map((routes, i) =>
       i === selectedLine.value
-        ? routes.map((route, j) =>
-          j === selectedRoute.value
+        ? routes.map((route) =>
+          route.id === selectedRouteId.value
             ? {
               ...route,
               author: author.toLowerCase().trim(),
@@ -552,11 +565,11 @@ const ToRemoveButton = () => {
 };
 
 const DeleteButton = () => {
-  const { currentRoute, lines, selectedLine, selectedRoute } = useContext(
+  const context = useContext(
     AppContext,
   );
 
-  if (!currentRoute.value) {
+  if (!context.currentRoute.value) {
     return null;
   }
 
@@ -564,12 +577,14 @@ const DeleteButton = () => {
     <div
       class="text-xl bg-red-500 p-3 font-semibold rounded m-2 text-white mt-4 flex items-center justify-center gap-1"
       onClick={() => {
-        lines.value = lines.value.map((routes, i) =>
-          i === selectedLine.value
-            ? routes.filter((_, i) => selectedRoute.value !== i)
-            : routes
+        console.log(`Deleting route`, context.currentRoute.value);
+
+        updateCurrentRoute(context, () => ({
+          deleted: true,
+        }));
+        context.selectedRouteId.value = getFirstRouteId(
+          context.lines.value[context.selectedLine.value],
         );
-        console.log(lines.value[selectedLine.value]);
       }}
     >
       <Trashcan color="#fff" size="30px" />

@@ -12,7 +12,7 @@ const Wall = ({ lines }: { lines: Route[][] }) => {
         <div>
           <div class="text-center text-xl mb-2">{i + 1}</div>
           <div class="border border-black">
-            {routes.map((route) => (
+            {routes.filter((route) => !route.deleted).map((route) => (
               <div class="w-24 h-28">
                 <RouteCard route={route} variant="small" />
               </div>
@@ -73,7 +73,7 @@ const Breakdown = (
               <div
                 class={`text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
                   getBg(r.color)
-                } ${getTextColor(r.color)}`}
+                } ${getTextColor(r.color)} ${r.deleted ? "line-through" : ""}`}
               >
                 {r.grade}
               </div>
@@ -107,13 +107,13 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
       <div class="mt-3">
         <Breakdown
           label="Par couleur"
-          allRoutes={allRoutes}
+          allRoutes={allRoutes.filter((route) => !route.deleted)}
           getBucket={(r) => r.color}
           sortBy={([, routes]) => -routes.length}
         />
         <Breakdown
           label="Par cotation"
-          allRoutes={allRoutes}
+          allRoutes={allRoutes.filter((route) => !route.deleted)}
           getBucket={(r) =>
             r.grade.includes("4") ? "4" : r.grade.replace("+", "")}
         />
@@ -135,7 +135,7 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
         <Breakdown
           label="À démonter"
           showTotal={true}
-          allRoutes={allRoutes.filter((r) => r.toRemove)}
+          allRoutes={allRoutes.filter((r) => !r.deleted && r.toRemove)}
           getBucket={(r) => `ligne ${r.lineIndex + 1}`}
           sortBy={([, routes]) => routes[0].lineIndex}
         />
@@ -150,7 +150,7 @@ const Suggestions = ({ lines }: { lines: Route[][] }) => {
       return true;
     }
     return lines[lineIndex].every((route) =>
-      route.color !== color || route.toRemove
+      route.color !== color || route.toRemove || route.deleted
     );
   };
   const canSet = (color: Color, lineIndex: number) => {
