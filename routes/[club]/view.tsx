@@ -102,7 +102,9 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
 
   return (
     <div>
-      <div class="text-xl ml-3">Nombre de voies : {allRoutes.length}</div>
+      <div class="text-xl ml-3">
+        Nombre de voies : {allRoutes.filter((r) => !r.deleted).length}
+      </div>
 
       <div class="mt-3">
         <Breakdown
