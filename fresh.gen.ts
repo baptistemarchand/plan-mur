@@ -10,7 +10,6 @@ import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $api_sync from "./routes/api/sync.ts";
 import * as $index from "./routes/index.tsx";
-import * as $pdf_test from "./routes/pdf-test.tsx";
 import * as $Editor from "./islands/Editor.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
@@ -24,7 +23,6 @@ const manifest = {
     "./routes/_app.tsx": $_app,
     "./routes/api/sync.ts": $api_sync,
     "./routes/index.tsx": $index,
-    "./routes/pdf-test.tsx": $pdf_test,
   },
   islands: {
     "./islands/Editor.tsx": $Editor,
