@@ -150,7 +150,11 @@ export default async function Mur(req: Request, ctx: RouteContext) {
   });
   const lines = result.value ?? demo;
 
-  const pdfDoc = await createPdf(lines);
+  const pdfDoc = await createPdf(
+    lines.map((line) =>
+      line.filter((a) => a.setAt?.toLowerCase() === "2024 oct")
+    ),
+  );
 
   return new Response(pdfDoc);
 }
