@@ -136,7 +136,7 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
         />
         <Breakdown
           label="À démonter"
-          showTotal={true}
+          showTotal
           allRoutes={allRoutes.filter((r) => !r.deleted && r.toRemove)}
           getBucket={(r) => `ligne ${r.lineIndex + 1}`}
           sortBy={([, routes]) => routes[0].lineIndex}

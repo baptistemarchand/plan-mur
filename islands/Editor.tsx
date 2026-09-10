@@ -15,7 +15,7 @@ const debounce = <F extends (...args: Parameters<F>) => ReturnType<F>>(
   func: F,
   waitFor: number,
 ) => {
-  let timeout: number;
+  let timeout: ReturnType<typeof setTimeout>;
 
   const debounced = (...args: Parameters<F>) => {
     clearTimeout(timeout);
@@ -387,6 +387,7 @@ const SetAtPickerPopup = () => {
         />
         <div class="mx-auto flex gap-4 bg-white">
           <button
+            type="button"
             class="text-2xl bg-green-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
             onClick={() => {
               if (newSetAt.value) {
@@ -398,6 +399,7 @@ const SetAtPickerPopup = () => {
             Ajouter
           </button>
           <button
+            type="button"
             class="text-2xl bg-gray-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
             onClick={() => {
               openSetAtPopup.value = false;
@@ -490,6 +492,7 @@ const AuthorPickerPopup = () => {
         />
         <div class="mx-auto flex gap-4">
           <button
+            type="button"
             class="text-2xl bg-green-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
             onClick={() => {
               if (newAuthor.value) {
@@ -501,6 +504,7 @@ const AuthorPickerPopup = () => {
             Ajouter
           </button>
           <button
+            type="button"
             class="text-2xl bg-gray-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
             onClick={() => {
               openAuthorPopup.value = false;
