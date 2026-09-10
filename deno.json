@@ -7,7 +7,8 @@
     "preview": "deno run -A main.ts",
     "update": "deno run -A -r https://fresh.deno.dev/update .",
     "migrate": "deno run -A migrate.ts",
-    "seed": "deno run -A seed.ts"
+    "seed": "deno run -A seed.ts",
+    "test": "deno test -A"
   },
   "lint": { "rules": { "tags": ["fresh", "recommended"] } },
   "imports": {

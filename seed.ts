@@ -1,8 +1,15 @@
 import { demo } from "./demo.ts";
 
+if (Deno.env.get("DENO_DEPLOYMENT_ID")) {
+  console.error(
+    "Attention ne pas seed en prod",
+  );
+  Deno.exit(1);
+}
+
 // Réinitialise la base KV locale avec le jeu de démo
 
-const clubs = ["picetcol", "faverges"];
+const clubs = ["club1", "club2"];
 
 const kv = await Deno.openKv();
 

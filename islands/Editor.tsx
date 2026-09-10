@@ -228,9 +228,9 @@ const GradePicker = () => {
         }`}
         onClick={() => {
           updateCurrentRoute(context, (route) => ({
-            grade: (route.grade.includes("+")
+            grade: route.grade.includes("+")
               ? route.grade.replace("+", "")
-              : `${route.grade}+`),
+              : `${route.grade}+`,
           }));
         }}
       >
