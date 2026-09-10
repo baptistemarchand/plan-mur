@@ -4,6 +4,7 @@
 
 import * as $_club_edit from "./routes/[club]/edit.tsx";
 import * as $_club_edit2 from "./routes/[club]/edit2.tsx";
+import * as $_club_ouvertures from "./routes/[club]/ouvertures.tsx";
 import * as $_club_pdf from "./routes/[club]/pdf.tsx";
 import * as $_club_view from "./routes/[club]/view.tsx";
 import * as $_404 from "./routes/_404.tsx";
@@ -17,6 +18,7 @@ const manifest = {
   routes: {
     "./routes/[club]/edit.tsx": $_club_edit,
     "./routes/[club]/edit2.tsx": $_club_edit2,
+    "./routes/[club]/ouvertures.tsx": $_club_ouvertures,
     "./routes/[club]/pdf.tsx": $_club_pdf,
     "./routes/[club]/view.tsx": $_club_view,
     "./routes/_404.tsx": $_404,

@@ -214,7 +214,9 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
   const result = await kv.get<Route[][]>(["lines", ctx.params.club], {
     consistency: "eventual",
   });
-  const lines = result.value ?? demo;
+  const lines = (result.value ?? demo).map((line) =>
+    line.filter((route) => !route.toOpen)
+  );
 
   return (
     <div>
@@ -230,6 +232,12 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
           EDIT
         </a> */
         }
+        <a
+          href={`/${ctx.params.club}/ouvertures`}
+          class="text-xl border border-black rounded px-4 py-2 inline-block ml-2 my-3"
+        >
+          OUVERTURES
+        </a>
         <a
           href={`/${ctx.params.club}/pdf`}
           class="text-xl border border-black rounded px-4 py-2 inline-block ml-2 my-3"
