@@ -81,7 +81,7 @@ export default function Ouvertures({ data }: PageProps<Data>) {
                 name="name"
                 required
                 maxLength={40}
-                placeholder="quentin"
+                placeholder="seb bouin"
                 class="border-2 border-black rounded px-2 py-1 flex-1"
               />
             </label>
