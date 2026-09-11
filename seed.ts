@@ -1,6 +1,6 @@
 import { demo } from "./demo.ts";
 
-if (Deno.env.get("DENO_DEPLOYMENT_ID")) {
+if (Deno.env.get("DENO_DEPLOY")) {
   console.error(
     "Attention ne pas seed en prod",
   );
