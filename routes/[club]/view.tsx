@@ -1,5 +1,5 @@
 import { RouteContext } from "$fresh/server.ts";
-import { Color, colors, getBg, getTextColor } from "../../colors.ts";
+import { Color, colors, getBg, getTextColor, isDark } from "../../colors.ts";
 import { RouteCard } from "../../components/RouteCard.tsx";
 import { demo } from "../../demo.ts";
 import { Route } from "../../types.ts";
@@ -27,10 +27,12 @@ const Wall = ({ lines }: { lines: Route[][] }) => {
 type RouteWithLineIndex = Route & { lineIndex: number };
 
 const Breakdown = (
-  { label, allRoutes, getBucket, getBuckets, sortBy, showTotal }: {
+  { label, allRoutes, getBucket, getBuckets, sortBy, showTotal, showTaken }: {
     label: string;
     allRoutes: RouteWithLineIndex[];
     showTotal?: true;
+    // Coin en surbrillance sur les voies prises, nom de l'ouvreur.euse au survol.
+    showTaken?: true;
     getBucket?: (r: RouteWithLineIndex) => string;
     getBuckets?: (r: RouteWithLineIndex) => string[];
     sortBy?: (
@@ -71,10 +73,21 @@ const Breakdown = (
             <div class="mr-3">{bucket}</div>
             {routes.map((r) => (
               <div
-                class={`text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
+                class={`relative overflow-hidden text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center ${
                   getBg(r.color)
-                } ${getTextColor(r.color)} ${r.deleted ? "line-through" : ""}`}
+                } ${getTextColor(r.color)} ${r.deleted ? "line-through" : ""} ${
+                  showTaken && r.author ? "cursor-help" : ""
+                }`}
+                title={showTaken ? r.author : undefined}
               >
+                {showTaken && r.author && (
+                  <div
+                    class="absolute top-0 left-0"
+                    style={`border-top: 10px solid ${
+                      isDark(r.color) ? "#fff" : "#000"
+                    }; border-right: 10px solid transparent;`}
+                  />
+                )}
                 {r.grade}
               </div>
             ))}
@@ -92,12 +105,23 @@ const Breakdown = (
   );
 };
 
-const Stats = ({ lines }: { lines: Route[][] }) => {
+const Stats = (
+  { lines, allLines, club }: {
+    lines: Route[][];
+    allLines: Route[][];
+    club: string;
+  },
+) => {
   const allRoutes: RouteWithLineIndex[] = lines.flatMap((routes, index) =>
     routes.map((route) => ({
       ...route,
       lineIndex: index,
     }))
+  );
+  const toOpen: RouteWithLineIndex[] = allLines.flatMap((routes, index) =>
+    routes
+      .filter((route) => route.toOpen && !route.deleted)
+      .map((route) => ({ ...route, lineIndex: index }))
   );
 
   return (
@@ -138,6 +162,14 @@ const Stats = ({ lines }: { lines: Route[][] }) => {
           label="À démonter"
           showTotal
           allRoutes={allRoutes.filter((r) => !r.deleted && r.toRemove)}
+          getBucket={(r) => `ligne ${r.lineIndex + 1}`}
+          sortBy={([, routes]) => routes[0].lineIndex}
+        />
+        <Breakdown
+          label="À ouvrir"
+          showTotal
+          allRoutes={toOpen}
+          showTaken
           getBucket={(r) => `ligne ${r.lineIndex + 1}`}
           sortBy={([, routes]) => routes[0].lineIndex}
         />
@@ -214,14 +246,13 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
   const result = await kv.get<Route[][]>(["lines", ctx.params.club], {
     consistency: "eventual",
   });
-  const lines = (result.value ?? demo).map((line) =>
-    line.filter((route) => !route.toOpen)
-  );
+  const allLines = result.value ?? demo;
+  const lines = allLines.map((line) => line.filter((route) => !route.toOpen));
 
   return (
     <div>
       <Wall lines={lines} />
-      <Stats lines={lines} />
+      <Stats lines={lines} allLines={allLines} />
       <Suggestions lines={lines} />
       <div>
         {
