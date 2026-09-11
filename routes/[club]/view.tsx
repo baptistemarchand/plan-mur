@@ -31,7 +31,6 @@ const Breakdown = (
     label: string;
     allRoutes: RouteWithLineIndex[];
     showTotal?: true;
-    // Coin en surbrillance sur les voies prises, nom de l'ouvreur.euse au survol.
     showTaken?: true;
     getBucket?: (r: RouteWithLineIndex) => string;
     getBuckets?: (r: RouteWithLineIndex) => string[];
