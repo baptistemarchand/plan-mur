@@ -125,39 +125,45 @@ const Stats = (
   );
 
   return (
-    <div>
-      <div class="text-xl ml-3">
-        Nombre de voies : {allRoutes.filter((r) => !r.deleted).length}
+    <div class="flex flex-wrap gap-x-12 py-4">
+      <div>
+        <div class="text-3xl font-bold ml-3 mt-4 mb-2">
+          Statistiques : {allRoutes.filter((r) => !r.deleted).length} voies
+        </div>
+
+        <div class="mt-3">
+          <Breakdown
+            label="Par couleur"
+            allRoutes={allRoutes.filter((route) => !route.deleted)}
+            getBucket={(r) => r.color}
+            sortBy={([, routes]) => -routes.length}
+          />
+          <Breakdown
+            label="Par cotation"
+            allRoutes={allRoutes.filter((route) => !route.deleted)}
+            getBucket={(r) =>
+              r.grade.includes("4") ? "4" : r.grade.replace("+", "")}
+          />
+          <Breakdown
+            label="Par session d'ouverture"
+            allRoutes={allRoutes}
+            getBucket={(r) => r.setAt ?? "Inconnue"}
+            sortBy={([bucket]) =>
+              bucket === "Inconnue"
+                ? -Infinity
+                : parseInt(bucket.replace(/[^0-9]/g, ""))}
+          />
+          <Breakdown
+            label="Par ouvreur.euse"
+            allRoutes={allRoutes.filter((r) => r.author)}
+            sortBy={([, routes]) => -routes.length}
+            getBuckets={(route) => getAuthors(route).map((a) => a.trim())}
+          />
+        </div>
       </div>
 
-      <div class="mt-3">
-        <Breakdown
-          label="Par couleur"
-          allRoutes={allRoutes.filter((route) => !route.deleted)}
-          getBucket={(r) => r.color}
-          sortBy={([, routes]) => -routes.length}
-        />
-        <Breakdown
-          label="Par cotation"
-          allRoutes={allRoutes.filter((route) => !route.deleted)}
-          getBucket={(r) =>
-            r.grade.includes("4") ? "4" : r.grade.replace("+", "")}
-        />
-        <Breakdown
-          label="Par session d'ouverture"
-          allRoutes={allRoutes}
-          getBucket={(r) => r.setAt ?? "Inconnue"}
-          sortBy={([bucket]) =>
-            bucket === "Inconnue"
-              ? -Infinity
-              : parseInt(bucket.replace(/[^0-9]/g, ""))}
-        />
-        <Breakdown
-          label="Par ouvreur.euse"
-          allRoutes={allRoutes.filter((r) => r.author)}
-          sortBy={([, routes]) => -routes.length}
-          getBuckets={(route) => getAuthors(route).map((a) => a.trim())}
-        />
+      <div>
+        <div class="text-3xl font-bold ml-3 mt-4 mb-2">À faire</div>
         <Breakdown
           label="À démonter"
           showTotal
@@ -173,6 +179,13 @@ const Stats = (
           getBucket={(r) => `ligne ${r.lineIndex + 1}`}
           sortBy={([, routes]) => routes[0].lineIndex}
         />
+        <a
+          href={`/${club}/ouvertures`}
+          class="text-xl border border-black rounded px-4 py-2 inline-block ml-3 mt-4"
+        >
+          OUVERTURES
+        </a>
+        <Suggestions lines={lines} />
       </div>
     </div>
   );
@@ -252,8 +265,7 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
   return (
     <div>
       <Wall lines={lines} />
-      <Stats lines={lines} allLines={allLines} />
-      <Suggestions lines={lines} />
+      <Stats lines={lines} allLines={allLines} club={ctx.params.club} />
       <div>
         {
           /* <a
@@ -263,12 +275,6 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
           EDIT
         </a> */
         }
-        <a
-          href={`/${ctx.params.club}/ouvertures`}
-          class="text-xl border border-black rounded px-4 py-2 inline-block ml-2 my-3"
-        >
-          OUVERTURES
-        </a>
         <a
           href={`/${ctx.params.club}/pdf`}
           class="text-xl border border-black rounded px-4 py-2 inline-block ml-2 my-3"
