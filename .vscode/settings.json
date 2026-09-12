@@ -14,5 +14,5 @@
   "[javascript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": true
 }

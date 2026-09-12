@@ -1,6 +1,6 @@
 import { Route } from "./types.ts";
 
-export const demo: Route[][] = [
+const rawDemo: Omit<Route, "id">[][] = [
   [
     {
       grade: "7a+",
@@ -347,3 +347,10 @@ export const demo: Route[][] = [
     },
   ],
 ];
+
+export const demo: Route[][] = rawDemo.map((line, lineIndex) =>
+  line.map((route, routeIndex) => ({
+    ...route,
+    id: `demo-${lineIndex}-${routeIndex}`,
+  }))
+);
