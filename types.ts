@@ -8,4 +8,5 @@ export type Route = {
   author?: string;
   toRemove?: boolean;
   deleted?: boolean;
+  toOpen?: boolean;
 };

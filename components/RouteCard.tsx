@@ -3,7 +3,9 @@ import {
   getBorderColor,
   getStripesColor,
   getTextColor,
+  isDark,
 } from "../colors.ts";
+import { Construction } from "./icons/Construction.tsx";
 import { Route } from "../types.ts";
 import { getAuthors } from "../utils.ts";
 
@@ -36,8 +38,14 @@ export const RouteCard = (
         );`
         : ""}
     >
-      <div class={`${gradeSize} font-semibold`}>
+      <div class={`${gradeSize} font-semibold flex items-center gap-2`}>
         {route.grade}
+        {route.toOpen && (
+          <Construction
+            color={isDark(route.color) ? "#fff" : "#000"}
+            size={big ? "28px" : "18px"}
+          />
+        )}
       </div>
       <div class={`${textSize}`}>
         {route.setAt}

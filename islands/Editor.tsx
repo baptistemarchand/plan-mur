@@ -9,6 +9,7 @@ import { Trashcan } from "../components/icons/Trashcan.tsx";
 import { Calendar } from "../components/icons/Calendar.tsx";
 import { Person } from "../components/icons/Person.tsx";
 import { Tools } from "../components/icons/Tools.tsx";
+import { Construction } from "../components/icons/Construction.tsx";
 import { nanoid } from "../utils.ts";
 
 const debounce = <F extends (...args: Parameters<F>) => ReturnType<F>>(
@@ -424,7 +425,7 @@ const SetAtPicker = () => {
 
   return (
     <div
-      class="text-xl bg-green-500 p-3 text-center font-semibold rounded m-2 text-white mt-4 flex gap-1 justify-center items-center"
+      class="text-xl bg-green-500 text-center font-semibold rounded m-1 text-white flex-1 min-h-0 flex gap-1 justify-center items-center"
       onClick={() => openSetAtPopup.value = true}
     >
       <Calendar color="#fff" size="30px" />
@@ -529,7 +530,7 @@ const AuthorPicker = () => {
 
   return (
     <div
-      class="text-xl bg-blue-500 p-3 font-semibold rounded m-2 text-white mt-4 flex justify-center items-center gap-1"
+      class="text-xl bg-blue-500 font-semibold rounded m-1 text-white flex-1 min-h-0 flex justify-center items-center gap-1"
       onClick={() => openAuthorPopup.value = true}
     >
       <Person color="#fff" size="30px" />
@@ -553,7 +554,7 @@ const ToRemoveButton = () => {
         context.currentRoute.value.toRemove
           ? "bg-white text-yellow-500"
           : "bg-yellow-500 text-white"
-      } p-3 font-semibold rounded m-2 mt-4 border-yellow-500 border flex items-center justify-center gap-1`}
+      } font-semibold rounded m-1 flex-1 min-h-0 border-yellow-500 border flex items-center justify-center gap-1`}
       onClick={() =>
         updateCurrentRoute(context, (route) => ({
           toRemove: !route.toRemove,
@@ -564,6 +565,36 @@ const ToRemoveButton = () => {
         size="30px"
       />
       <div>À démonter</div>
+    </div>
+  );
+};
+
+const ToOpenButton = () => {
+  const context = useContext(
+    AppContext,
+  );
+
+  if (!context.currentRoute.value) {
+    return null;
+  }
+
+  return (
+    <div
+      class={`text-xl ${
+        context.currentRoute.value.toOpen
+          ? "bg-white text-purple-600"
+          : "bg-purple-600 text-white"
+      } font-semibold rounded m-1 flex-1 min-h-0 border-purple-600 border flex items-center justify-center gap-1`}
+      onClick={() =>
+        updateCurrentRoute(context, (route) => ({
+          toOpen: !route.toOpen,
+        }))}
+    >
+      <Construction
+        color={context.currentRoute.value.toOpen ? "#9333ea" : "#fff"}
+        size="30px"
+      />
+      <div>À ouvrir</div>
     </div>
   );
 };
@@ -579,7 +610,7 @@ const DeleteButton = () => {
 
   return (
     <div
-      class="text-xl bg-red-500 p-3 font-semibold rounded m-2 text-white mt-4 flex items-center justify-center gap-1"
+      class="text-xl bg-red-500 font-semibold rounded m-1 text-white flex-1 min-h-0 flex items-center justify-center gap-1"
       onClick={() => {
         console.log(`Deleting route`, context.currentRoute.value);
 
@@ -622,10 +653,11 @@ export default function Editor(
             <div class="h-1/2">
               <GradePicker />
             </div>
-            <div class="h-1/2 border-black border-t">
+            <div class="h-1/2 border-black border-t flex flex-col">
               <SetAtPicker />
               <AuthorPicker />
               <ToRemoveButton />
+              <ToOpenButton />
               <DeleteButton />
             </div>
           </div>
