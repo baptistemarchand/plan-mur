@@ -2,13 +2,8 @@ import { RouteContext } from "$fresh/server.ts";
 import { demo } from "../../demo.ts";
 import { Route } from "../../types.ts";
 
-import {
-  PageSizes,
-  PDFDocument,
-  rgb,
-  StandardFonts,
-} from "https://cdn.skypack.dev/pdf-lib@^1.11.1?dts";
-import fontkit from "https://cdn.skypack.dev/@pdf-lib/fontkit@^1.0.0?dts";
+import { PageSizes, PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
 import { Color, isDark } from "../../colors.ts";
 
 export const getPrintBgColor = (color: Color) => {
@@ -53,10 +48,7 @@ const HEIGHT = 241;
 
 // Create a new PDF document with one page and some text
 async function createPdf(lines: Route[][]) {
-  const routes = lines.flatMap((routes) => routes).filter((r) =>
-    // r.setAt === "2024 fev"
-    true
-  );
+  const routes = lines.flatMap((routes) => routes);
 
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
@@ -143,7 +135,7 @@ async function createPdf(lines: Route[][]) {
   return pdfDoc.save();
 }
 
-export default async function Mur(req: Request, ctx: RouteContext) {
+export default async function Mur(_req: Request, ctx: RouteContext) {
   const kv = await Deno.openKv();
   const result = await kv.get<Route[][]>(["lines", ctx.params.club], {
     consistency: "eventual",
@@ -156,5 +148,5 @@ export default async function Mur(req: Request, ctx: RouteContext) {
     ),
   );
 
-  return new Response(pdfDoc);
+  return new Response(pdfDoc.slice());
 }

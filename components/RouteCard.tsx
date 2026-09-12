@@ -42,7 +42,9 @@ export const RouteCard = (
       <div class={`${textSize}`}>
         {route.setAt}
       </div>
-      {authors.map((author) => <div class={`${textSize}`}>{author}</div>)}
+      {authors.map((author, i) => (
+        <div key={i} class={`${textSize}`}>{author}</div>
+      ))}
     </div>
   );
 };

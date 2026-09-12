@@ -3,10 +3,6 @@ import { nanoid } from "./utils.ts";
 
 const kv = await Deno.openKv();
 
-const deleteClub = async (club: string) => {
-  await kv.delete(["lines", club]);
-};
-
 const processRoute = (route: Route): Route => {
   return ({
     ...route,
@@ -15,13 +11,7 @@ const processRoute = (route: Route): Route => {
 };
 
 const processClub = async (club: string, lines: Route[][]) => {
-  // for (const routes of lines) {
-  //   for (const route of routes) {
-  //     route.author = route.author?.toLowerCase();
-  //   }
-  // }
   const newLines = lines.map((routes) => routes.map(processRoute));
-  // console.log(newLines);
   await kv.set(["lines", club], newLines);
 };
 
@@ -30,7 +20,7 @@ const processAllRoutes = async (club?: string) => {
 
   for await (const entry of entries) {
     console.log(
-      `Processing club [${entry.key[1]}] (${
+      `Processing club [${String(entry.key[1])}] (${
         entry.value.flatMap((x) => x).length
       } routes)`,
     );
@@ -38,7 +28,7 @@ const processAllRoutes = async (club?: string) => {
       console.log("Skipping");
       continue;
     }
-    processClub(entry.key[1] as string, entry.value);
+    await processClub(entry.key[1] as string, entry.value);
   }
 };
 
@@ -55,6 +45,36 @@ const listRoutes = async (club: string) => {
   console.log(lines);
 };
 
-// await processAllRoutes();
-// await listClubs();
-await listRoutes("picetcol");
+const usage = `Usage: deno task migrate <commande> [club]
+
+  list-clubs              liste les clés présentes en base
+  list-routes <club>      affiche les lignes d'un club
+  regenerate-ids [club]   réattribue un id à chaque voie (tous les clubs si omis)`;
+
+const [command, club] = Deno.args;
+
+const requireClub = (): string => {
+  if (!club) {
+    console.error(`Commande "${command}" : argument <club> manquant.\n`);
+    console.error(usage);
+    Deno.exit(1);
+  }
+  return club;
+};
+
+switch (command) {
+  case "list-clubs":
+    await listClubs();
+    break;
+  case "list-routes":
+    await listRoutes(requireClub());
+    break;
+  case "regenerate-ids":
+    await processAllRoutes(club);
+    break;
+  default:
+    console.log(usage);
+    Deno.exit(command ? 1 : 0);
+}
+
+kv.close();
