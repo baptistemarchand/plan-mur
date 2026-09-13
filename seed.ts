@@ -1,7 +1,8 @@
 import { setClub } from "./clubs.ts";
 import { demo } from "./demo.ts";
+import { getKv } from "./kv.ts";
 
-if (Deno.env.get("DENO_DEPLOY")) {
+if (Deno.env.get("DENO_DEPLOY") || Deno.env.get("KV_URL")) {
   console.error(
     "Attention ne pas seed en prod",
   );
@@ -15,7 +16,7 @@ const clubs = [
   { slug: "club2", name: "Club 2" },
 ];
 
-const kv = await Deno.openKv();
+const kv = await getKv();
 
 for (const prefix of ["lines", "clubs"]) {
   for await (const entry of kv.list({ prefix: [prefix] })) {

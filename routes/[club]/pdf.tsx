@@ -5,6 +5,7 @@ import { Route } from "../../types.ts";
 import { PageSizes, PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { Color, isDark } from "../../colors.ts";
+import { getKv } from "../../kv.ts";
 
 export const getPrintBgColor = (color: Color) => {
   switch (color) {
@@ -136,7 +137,7 @@ async function createPdf(lines: Route[][]) {
 }
 
 export default async function Mur(_req: Request, ctx: RouteContext) {
-  const kv = await Deno.openKv();
+  const kv = await getKv();
   const result = await kv.get<Route[][]>(["lines", ctx.params.club], {
     consistency: "eventual",
   });

@@ -2,13 +2,14 @@ import { Handlers, PageProps } from "$fresh/server.ts";
 import { getBg, getTextColor } from "../../colors.ts";
 import { demo } from "../../demo.ts";
 import { Route } from "../../types.ts";
+import { getKv } from "../../kv.ts";
 
 type Planned = Route & { line: number };
 
 type Data = { club: string; planned: Planned[] };
 
 const readLines = async (club: string) => {
-  const kv = await Deno.openKv();
+  const kv = await getKv();
   return (await kv.get<Route[][]>(["lines", club])).value ?? demo;
 };
 
@@ -47,7 +48,7 @@ export const handler: Handlers<Data> = {
       })
     );
 
-    const kv = await Deno.openKv();
+    const kv = await getKv();
     await kv.set(["lines", club], next);
 
     // PRG : un rafraîchissement ne rejoue pas le formulaire.

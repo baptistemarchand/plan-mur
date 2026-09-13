@@ -1,7 +1,8 @@
 import { countRoutes, deleteClub, listClubs, setClub } from "./clubs.ts";
+import { getKv, kvTarget } from "./kv.ts";
 import { Route } from "./types.ts";
 
-const kv = await Deno.openKv();
+const kv = await getKv();
 
 const showClubs = async () => {
   const clubs = await listClubs();
@@ -49,9 +50,15 @@ const usage = `Usage: deno task migrate <commande> [club]
   set-club <club> <nom...>   crée ou renomme un club
   remove-club <club>         supprime un club et toutes ses voies (irréversible)
   import-clubs               enregistre les clubs ayant des voies mais pas de nom
-  list-routes <club>         affiche les lignes d'un club`;
+  list-routes <club>         affiche les lignes d'un club
+
+Cible la base locale par défaut. Pour la prod :
+  KV_URL=https://api.deno.com/v2/databases/<id>/connect \\
+    DENO_KV_ACCESS_TOKEN=ddo_... deno task migrate <commande>`;
 
 const [command, club, ...rest] = Deno.args;
+
+console.log(`Base ciblée : ${kvTarget()}`);
 
 const requireClub = (): string => {
   if (!club) {

@@ -4,6 +4,7 @@ import { RouteCard } from "../../components/RouteCard.tsx";
 import { demo } from "../../demo.ts";
 import { Route } from "../../types.ts";
 import { getAuthors } from "../../utils.ts";
+import { getKv } from "../../kv.ts";
 
 const Wall = ({ lines }: { lines: Route[][] }) => {
   return (
@@ -254,7 +255,7 @@ const Suggestions = ({ lines }: { lines: Route[][] }) => {
 };
 
 export default async function Mur(_req: Request, ctx: RouteContext) {
-  const kv = await Deno.openKv();
+  const kv = await getKv();
   const result = await kv.get<Route[][]>(["lines", ctx.params.club], {
     consistency: "eventual",
   });

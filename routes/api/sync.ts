@@ -1,11 +1,12 @@
 import { FreshContext } from "$fresh/server.ts";
 import { clubExists } from "../../clubs.ts";
+import { getKv } from "../../kv.ts";
 
 export const handler = async (
   req: Request,
   _ctx: FreshContext,
 ): Promise<Response> => {
-  const kv = await Deno.openKv();
+  const kv = await getKv();
   const lines = await req.json();
   const url = new URL(req.url);
   const club = url.searchParams.get("club")!;

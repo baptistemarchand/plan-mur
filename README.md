@@ -29,6 +29,17 @@ deno task check     # fmt, lint et types
 Chaque club est une entrée `["clubs", slug]` en base, avec son nom d'affichage.
 Ses voies sont stockées à part, sous `["lines", slug]`.
 
+Les commandes ciblent la base **locale** par défaut. Pour agir sur la prod,
+préfixer par `KV_URL` (l'URL de connexion de la base, visible sur
+console.deno.com) et `DENO_KV_ACCESS_TOKEN` :
+
+```
+KV_URL=https://api.deno.com/v2/databases/<id>/connect \
+  DENO_KV_ACCESS_TOKEN=ddo_... deno task migrate list-clubs
+```
+
+Chaque commande annonce la base qu'elle vise avant d'agir.
+
 ### Commandes métier
 
 ```
