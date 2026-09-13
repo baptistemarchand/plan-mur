@@ -10,3 +10,8 @@ export type Route = {
   deleted?: boolean;
   toOpen?: boolean;
 };
+
+export type Club = {
+  slug: string;
+  name: string;
+};

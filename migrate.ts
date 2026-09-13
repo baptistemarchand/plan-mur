@@ -1,41 +1,39 @@
+import { countRoutes, deleteClub, listClubs, setClub } from "./clubs.ts";
 import { Route } from "./types.ts";
-import { nanoid } from "./utils.ts";
 
 const kv = await Deno.openKv();
 
-const processRoute = (route: Route): Route => {
-  return ({
-    ...route,
-    id: nanoid(),
-  });
-};
-
-const processClub = async (club: string, lines: Route[][]) => {
-  const newLines = lines.map((routes) => routes.map(processRoute));
-  await kv.set(["lines", club], newLines);
-};
-
-const processAllRoutes = async (club?: string) => {
-  const entries = kv.list<Route[][]>({ prefix: ["lines"] });
-
-  for await (const entry of entries) {
-    console.log(
-      `Processing club [${String(entry.key[1])}] (${
-        entry.value.flatMap((x) => x).length
-      } routes)`,
-    );
-    if (club && club !== entry.key[1]) {
-      console.log("Skipping");
-      continue;
-    }
-    await processClub(entry.key[1] as string, entry.value);
+const showClubs = async () => {
+  const clubs = await listClubs();
+  if (clubs.length === 0) {
+    console.log("Aucun club enregistré.");
+    return;
+  }
+  for (const club of clubs) {
+    console.log(`${club.slug}\t${club.name}`);
   }
 };
 
-const listClubs = async () => {
-  const entries = kv.list<Route[][]>({ prefix: ["lines"] });
-  for await (const entry of entries) {
-    console.log(entry.key);
+// TODO : supprimer après usage, rattrapage historique :
+// enregistre les clubs qui ont des voies en base mais pas encore de nom.
+const importClubs = async () => {
+  const registered = new Set((await listClubs()).map((club) => club.slug));
+  const slugs: string[] = [];
+
+  for await (const entry of kv.list<Route[][]>({ prefix: ["lines"] })) {
+    const slug = String(entry.key[1]);
+    if (!registered.has(slug)) {
+      slugs.push(slug);
+    }
+  }
+
+  if (slugs.length === 0) {
+    console.log("Tous les clubs ayant des voies sont déjà enregistrés.");
+    return;
+  }
+  for (const slug of slugs) {
+    await setClub(slug, slug);
+    console.log(`[${slug}] enregistré (nom à préciser avec set-club).`);
   }
 };
 
@@ -47,11 +45,13 @@ const listRoutes = async (club: string) => {
 
 const usage = `Usage: deno task migrate <commande> [club]
 
-  list-clubs              liste les clés présentes en base
-  list-routes <club>      affiche les lignes d'un club
-  regenerate-ids [club]   réattribue un id à chaque voie (tous les clubs si omis)`;
+  list-clubs                 liste les clubs enregistrés (slug et nom)
+  set-club <club> <nom...>   crée ou renomme un club
+  remove-club <club>         supprime un club et toutes ses voies (irréversible)
+  import-clubs               enregistre les clubs ayant des voies mais pas de nom
+  list-routes <club>         affiche les lignes d'un club`;
 
-const [command, club] = Deno.args;
+const [command, club, ...rest] = Deno.args;
 
 const requireClub = (): string => {
   if (!club) {
@@ -64,13 +64,36 @@ const requireClub = (): string => {
 
 switch (command) {
   case "list-clubs":
-    await listClubs();
+    await showClubs();
+    break;
+  case "set-club": {
+    const slug = requireClub();
+    const name = rest.join(" ").trim();
+    if (!name) {
+      console.error(`Le nom du club est manquant.`);
+      console.error(usage);
+      Deno.exit(1);
+    }
+    await setClub(slug, name);
+    console.log(`Le club ${slug} est enregistré sous le nom "${name}".`);
+    break;
+  }
+  case "remove-club": {
+    const slug = requireClub();
+    const count = await countRoutes(slug);
+    if (!confirm(`Supprimer le club ${slug} et ses ${count} voies ?`)) {
+      console.log("Annulé.");
+      break;
+    }
+    await deleteClub(slug);
+    console.log(`Le club ${slug} et ses ${count} voies sont supprimés.`);
+    break;
+  }
+  case "import-clubs":
+    await importClubs();
     break;
   case "list-routes":
     await listRoutes(requireClub());
-    break;
-  case "regenerate-ids":
-    await processAllRoutes(club);
     break;
   default:
     console.log(usage);

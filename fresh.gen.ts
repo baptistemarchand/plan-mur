@@ -2,6 +2,7 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
+import * as $_club_middleware from "./routes/[club]/_middleware.ts";
 import * as $_club_edit from "./routes/[club]/edit.tsx";
 import * as $_club_edit2 from "./routes/[club]/edit2.tsx";
 import * as $_club_ouvertures from "./routes/[club]/ouvertures.tsx";
@@ -16,6 +17,7 @@ import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
+    "./routes/[club]/_middleware.ts": $_club_middleware,
     "./routes/[club]/edit.tsx": $_club_edit,
     "./routes/[club]/edit2.tsx": $_club_edit2,
     "./routes/[club]/ouvertures.tsx": $_club_ouvertures,
