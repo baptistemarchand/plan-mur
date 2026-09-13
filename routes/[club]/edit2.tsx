@@ -10,7 +10,11 @@ export default async function Mur(_req: Request, ctx: RouteContext) {
 
   return (
     <div>
-      <Editor lines={lines} club={ctx.params.club} />
+      <Editor
+        lines={lines}
+        club={ctx.params.club}
+        versionstamp={result.versionstamp}
+      />
     </div>
   );
 }
