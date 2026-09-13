@@ -26,24 +26,42 @@ const debounce = <F extends (...args: Parameters<F>) => ReturnType<F>>(
   return debounced;
 };
 
-type DirtyState = "DIRTY" | "LOADING" | "SYNCED";
+type DirtyState = "DIRTY" | "LOADING" | "SYNCED" | "CONFLICT" | "ERROR";
+
 const sync_ = async (
   club: string,
   lines: Route[][],
   dirtySate: Signal<DirtyState>,
+  versionstamp: Signal<string | null>,
 ) => {
   if (!IS_BROWSER) {
     return;
   }
+
+  if (dirtySate.value === "CONFLICT") {
+    return;
+  }
   dirtySate.value = "LOADING";
-  await fetch(`/api/sync?club=${club}`, {
+
+  const response = await fetch(`/api/sync?club=${club}`, {
     method: "POST",
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(lines),
+    body: JSON.stringify({ lines, versionstamp: versionstamp.value }),
   });
+
+  if (response.status === 409) {
+    dirtySate.value = "CONFLICT";
+    return;
+  }
+  if (!response.ok) {
+    dirtySate.value = "ERROR";
+    return;
+  }
+
+  versionstamp.value = (await response.json()).versionstamp;
   dirtySate.value = "SYNCED";
 };
 
@@ -51,6 +69,17 @@ const sync = debounce(sync_, 3000);
 
 const SyncIndicator = () => {
   const { dirtySate } = useContext(AppContext);
+
+  if (dirtySate.value === "CONFLICT" || dirtySate.value === "ERROR") {
+    return (
+      <div class="bg-red-600 text-white px-3 py-2 text-center">
+        {dirtySate.value === "CONFLICT"
+          ? "Le mur a été modifié ailleurs : vos changements ne sont plus enregistrés. Rechargez la page."
+          : "L'enregistrement a échoué. Rechargez la page."}
+      </div>
+    );
+  }
+
   const color = (() => {
     if (dirtySate.value === "DIRTY") {
       return "bg-yellow-300";
@@ -67,20 +96,26 @@ const getFirstRouteId = (line: Route[]) => {
   return line.find((route) => !route.deleted)!.id;
 };
 
-const createAppContext = (lines_: Route[][], club: string) => {
+const createAppContext = (
+  lines_: Route[][],
+  club: string,
+  versionstamp_: string | null,
+) => {
   const selectedLine = signal(0);
   const selectedRouteId = signal(getFirstRouteId(lines_[0]));
   const lines = signal(lines_);
   const dirtySate = signal<DirtyState>("SYNCED");
+  const versionstamp = signal(versionstamp_);
 
   effect(() => {
     dirtySate.value = "DIRTY";
-    sync(club, lines.value, dirtySate);
+    sync(club, lines.value, dirtySate, versionstamp);
   });
 
   return ({
     club,
     dirtySate,
+    versionstamp,
     selectedLine,
     selectedRouteId,
     lines,
@@ -629,11 +664,15 @@ const DeleteButton = () => {
 };
 
 export default function Editor(
-  { lines, club }: { lines: Route[][]; club: string },
+  { lines, club, versionstamp }: {
+    lines: Route[][];
+    club: string;
+    versionstamp: string | null;
+  },
 ) {
   return (
     <AppContext.Provider
-      value={createAppContext(lines, club)}
+      value={createAppContext(lines, club, versionstamp)}
     >
       <div class="h-[calc(100dvh)]">
         <AuthorPickerPopup />
