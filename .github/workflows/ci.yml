@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+
+      - name: Build Cloudflare
+        run: npm run build
+
+      - name: Taille du bundle Worker
+        run: npx wrangler deploy --dry-run --outdir=/tmp/worker
+
+      # La cible self-host est construite ET démarrée : un build qui passe ne
+      # prouve rien, c'est à l'exécution que les modules natifs se plaignent.
+      - name: Build Node
+        run: npm run build:node
+
+      - name: Smoke test de la cible Node
+        run: |
+          npm run db:migrate
+          DATABASE_PATH=ci.db PORT=3099 node build/index.js &
+          for i in $(seq 1 20); do
+            curl -sf -o /dev/null http://localhost:3099/ && break
+            sleep 1
+          done
+          curl -sf -o /dev/null http://localhost:3099/ || { echo "la cible Node ne répond pas"; exit 1; }
+        env:
+          DATABASE_PATH: ci.db
