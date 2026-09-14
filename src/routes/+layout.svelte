@@ -1,11 +1,11 @@
 <script lang="ts">
-	import '../app.css';
+  import '../app.css'
 
-	let { children } = $props();
+  let {children} = $props()
 </script>
 
 <svelte:head>
-	<title>plan-mur</title>
+  <title>plan-mur</title>
 </svelte:head>
 
 {@render children()}

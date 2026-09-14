@@ -1,44 +1,44 @@
 {
-	"name": "plan-mur",
-	"private": true,
-	"version": "0.0.1",
-	"type": "module",
-	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"db:import": "node scripts/import-kv.ts",
-		"cf:dev": "wrangler dev",
-		"cf:migrate": "wrangler d1 migrations apply plan-mur",
-		"cf:types": "wrangler types ./src/worker-configuration.d.ts"
-	},
-	"devDependencies": {
-		"@sveltejs/adapter-cloudflare": "^7.2.9",
-		"@sveltejs/kit": "^2.63.0",
-		"@tailwindcss/vite": "^4.3.3",
-		"@types/better-sqlite3": "^9.6.0",
-		"better-sqlite3": "^13.0.3",
-		"prettier": "^3.9.6",
-		"prettier-plugin-svelte": "^4.1.1",
-		"svelte": "^5.56.1",
-		"svelte-check": "^4.6.0",
-		"tailwindcss": "^4.3.3",
-		"typescript": "^6.0.3",
-		"vite": "^8.0.16",
-		"vitest": "^5.0.0",
-		"wrangler": "^4.131.2"
-	},
-	"dependencies": {
-		"@pdf-lib/fontkit": "^1.1.1",
-		"kysely": "^0.29.5",
-		"kysely-d1": "^0.4.0",
-		"nanoid": "^6.0.1",
-		"pdf-lib": "^1.17.1"
-	}
+  "name": "plan-mur",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:import": "node scripts/import-kv.ts",
+    "cf:dev": "wrangler dev",
+    "cf:migrate": "wrangler d1 migrations apply plan-mur",
+    "cf:types": "wrangler types ./src/worker-configuration.d.ts"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-cloudflare": "^7.2.9",
+    "@sveltejs/kit": "^2.63.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/better-sqlite3": "^9.6.0",
+    "better-sqlite3": "^13.0.3",
+    "prettier": "^3.9.6",
+    "prettier-plugin-svelte": "^4.1.1",
+    "svelte": "^5.56.1",
+    "svelte-check": "^4.6.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vitest": "^5.0.0",
+    "wrangler": "^4.131.2"
+  },
+  "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
+    "kysely": "^0.29.5",
+    "kysely-d1": "^0.4.0",
+    "nanoid": "^6.0.1",
+    "pdf-lib": "^1.17.1"
+  }
 }
