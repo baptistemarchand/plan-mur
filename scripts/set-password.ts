@@ -18,10 +18,13 @@ const header = [
   '',
 ].join('\n')
 
-const statement = `UPDATE club SET passwordHash = ${quote(await hashPassword(password))} WHERE slug = ${quote(slug)};`
+const statement =
+  `UPDATE club SET passwordHash = ${quote(await hashPassword(password))} ` +
+  `WHERE slug = ${quote(slug)} RETURNING slug;`
 
 mkdirSync(dirname(file), {recursive: true})
 writeFileSync(file, `${header}${statement}\n`)
 
 console.log(`mot de passe du club ${slug} -> ${file}`)
+console.log("vérifier que l'exécution renvoie bien une ligne : sinon le slug n'existe pas.")
 console.log("les sessions ouvertes de ce club tomberont à l'exécution.")
