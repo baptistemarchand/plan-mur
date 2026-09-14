@@ -8,10 +8,7 @@
 		<div class="text-center mx-16">Aucun club enregistré.</div>
 	{:else}
 		{#each data.clubs as club (club.slug)}
-			<a
-				href="/{club.slug}/view"
-				class="px-4 py-2 border border-black rounded text-center mx-16"
-			>
+			<a href="/{club.slug}/view" class="px-4 py-2 border border-black rounded text-center mx-16">
 				{club.name}
 			</a>
 		{/each}

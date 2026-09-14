@@ -107,7 +107,9 @@ const header = [
 mkdirSync(dirname(output), { recursive: true });
 writeFileSync(output, `${header}${statements.join('\n')}\n`);
 
-console.log(`${dump.clubs.length} clubs, ${statements.length - dump.clubs.length} voies -> ${output}`);
+console.log(
+	`${dump.clubs.length} clubs, ${statements.length - dump.clubs.length} voies -> ${output}`
+);
 for (const warning of [...new Set(warnings)]) {
 	console.warn(`  attention : ${warning}`);
 }

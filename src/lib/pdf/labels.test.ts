@@ -34,7 +34,18 @@ describe('createLabelsPdf', () => {
 
 	it('accepte une voie sans session ni ouvreur', async () => {
 		const bytes = await createLabelsPdf(
-			[{ id: 'a', color: 'noir', grade: '7a', setAt: null, author: null, toRemove: false, toOpen: false, deletedAt: null }],
+			[
+				{
+					id: 'a',
+					color: 'noir',
+					grade: '7a',
+					setAt: null,
+					author: null,
+					toRemove: false,
+					toOpen: false,
+					deletedAt: null
+				}
+			],
 			fontBytes as ArrayBuffer
 		);
 		expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);

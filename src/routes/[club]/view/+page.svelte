@@ -2,7 +2,13 @@
 	import Breakdown from '$lib/components/Breakdown.svelte';
 	import RouteCard from '$lib/components/RouteCard.svelte';
 	import ColorChip from '$lib/components/ColorChip.svelte';
-	import { getAuthors, isLive, openedLines, plannedRoutes, withLineIndex } from '$lib/domain/routes';
+	import {
+		getAuthors,
+		isLive,
+		openedLines,
+		plannedRoutes,
+		withLineIndex
+	} from '$lib/domain/routes';
 	import {
 		byCountDesc,
 		byLine,
@@ -57,7 +63,7 @@
 			/>
 			<Breakdown
 				label="Par session d'ouverture"
-				routes={routes}
+				{routes}
 				getBuckets={(route) => [route.setAt ?? UNKNOWN_SESSION]}
 				sortBy={(bucket) => sessionSortKey(bucket.label)}
 			/>

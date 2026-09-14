@@ -88,14 +88,24 @@ describe('openedLines et plannedRoutes', () => {
 	];
 
 	it('retire les voies planifiées du plan du mur', () => {
-		expect(openedLines(lines).flat().map((r) => r.id)).toEqual(['1']);
+		expect(
+			openedLines(lines)
+				.flat()
+				.map((r) => r.id)
+		).toEqual(['1']);
 	});
 
 	// Volontaire : les découpages par session et par ouvreur.euse montrent
 	// l'historique, une voie démontée reste au crédit de qui l'a ouverte.
 	it('garde les voies supprimées, que chaque appelant filtre ou non', () => {
-		const withDeleted = [[route({ id: '1' }), route({ id: '2', deletedAt: '2020-01-01T00:00:00.000Z' })]];
-		expect(openedLines(withDeleted).flat().map((r) => r.id)).toEqual(['1', '2']);
+		const withDeleted = [
+			[route({ id: '1' }), route({ id: '2', deletedAt: '2020-01-01T00:00:00.000Z' })]
+		];
+		expect(
+			openedLines(withDeleted)
+				.flat()
+				.map((r) => r.id)
+		).toEqual(['1', '2']);
 	});
 
 	it('ne planifie pas les voies supprimées', () => {

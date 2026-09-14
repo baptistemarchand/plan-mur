@@ -8,9 +8,7 @@
 	// La session retenue est dérivée, pas copiée : changer de club sans
 	// remonter la page ne doit pas garder une session qui n'existe plus.
 	let chosen = $state('');
-	const session = $derived(
-		data.sessions.includes(chosen) ? chosen : (data.sessions[0] ?? '')
-	);
+	const session = $derived(data.sessions.includes(chosen) ? chosen : (data.sessions[0] ?? ''));
 	let building = $state(false);
 	let failure = $state('');
 

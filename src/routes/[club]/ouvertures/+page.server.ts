@@ -25,7 +25,7 @@ export const actions: Actions = {
 
 		const taken = await claimRoute(locals.db, locals.club!, routeId, name);
 		if (!taken) {
-			return fail(409, { message: 'Quelqu\'un vient de prendre cette voie.' });
+			return fail(409, { message: "Quelqu'un vient de prendre cette voie." });
 		}
 
 		redirect(303, `/${params.club}/ouvertures`);

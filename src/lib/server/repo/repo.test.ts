@@ -104,7 +104,7 @@ describe('getWall', () => {
 
 	// Le nombre de lignes se déduit des voies : une ligne ajoutée dans
 	// l'éditeur et laissée vide n'existe nulle part en base.
-	it("ne garde pas une ligne restée vide", async () => {
+	it('ne garde pas une ligne restée vide', async () => {
 		await put({ id: 'a', lineIndex: 0 });
 		expect(await getWall(db, club)).toHaveLength(1);
 	});
@@ -153,7 +153,7 @@ describe('saveRoute', () => {
 
 	// Le conflit d'upsert porte sur route.id seul : sans le garde-fou sur
 	// clubId, un identifiant deviné ferait migrer la voie d'un club à l'autre.
-	it("refuse un identifiant qui appartient à un autre club", async () => {
+	it('refuse un identifiant qui appartient à un autre club', async () => {
 		await put({ id: 'a' });
 		const autre: Club = { ...club, id: club.id + 1 };
 

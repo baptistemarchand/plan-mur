@@ -22,4 +22,3 @@ export const getClubBySlug = async (
 		.executeTakeFirst();
 	return row && toClub(row);
 };
-
