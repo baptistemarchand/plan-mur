@@ -23,7 +23,7 @@
 	);
 </script>
 
-<div class="h-[calc(100dvh)]">
+<div class="h-[calc(100dvh)] flex flex-col">
 	{#if state.authorPopup && state.currentRoute}
 		<PickerPopup
 			values={state.allAuthors}
@@ -49,17 +49,17 @@
 		/>
 	{/if}
 
-	<div class="{indicator} h-1"></div>
+	<div class="{indicator} h-1 shrink-0"></div>
 
 	{#if state.saveState === 'FAILED'}
-		<div class="bg-red-500 text-white text-center py-2 text-lg">
+		<div class="bg-red-500 text-white text-center py-2 text-lg shrink-0">
 			Ta dernière retouche n'a pas été enregistrée. Vérifie la connexion, puis refais-la.
 		</div>
 	{/if}
 
-	<div class="h-1/6"><LinePicker /></div>
+	<div class="basis-1/6 shrink-0"><LinePicker /></div>
 
-	<div class="h-5/6 flex">
+	<div class="grow min-h-0 flex">
 		<div class="w-2/6"><Line /></div>
 
 		<div class="w-3/6 border-black border-r border-l">

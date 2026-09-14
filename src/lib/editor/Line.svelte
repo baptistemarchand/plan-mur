@@ -16,7 +16,11 @@
 		</button>
 	{/each}
 	{#if state.canAddRoute}
-		<button type="button" class="p-3 h-full text-5xl font-semibold" onclick={() => state.addRoute()}>
+		<button
+			type="button"
+			class="h-1/5 w-full block p-3 text-left text-5xl font-semibold"
+			onclick={() => state.addRoute()}
+		>
 			+
 		</button>
 	{/if}
