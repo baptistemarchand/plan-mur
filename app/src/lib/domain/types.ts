@@ -16,11 +16,5 @@ export type Club = {
 	id: number;
 	slug: string;
 	name: string;
-	lineCount: number;
 	maxLines: number;
-};
-
-export type Wall = {
-	lines: Route[][];
-	revision: number;
 };

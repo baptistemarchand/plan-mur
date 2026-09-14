@@ -2,10 +2,8 @@ CREATE TABLE club (
   id           INTEGER PRIMARY KEY,
   slug         TEXT    NOT NULL UNIQUE,
   name         TEXT    NOT NULL,
-  lineCount    INTEGER NOT NULL DEFAULT 0,
   maxLines     INTEGER NOT NULL DEFAULT 16,
   passwordHash TEXT    NOT NULL,
-  revision     INTEGER NOT NULL DEFAULT 0,
   createdAt    TEXT    NOT NULL,
   deletedAt    TEXT
 );

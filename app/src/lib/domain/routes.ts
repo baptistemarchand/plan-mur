@@ -1,5 +1,8 @@
 import type { Route } from './types';
 
+/** Une voie encore au mur. La suppression est logique, jamais une ligne retirée. */
+export const isLive = (route: Route): boolean => !route.deletedAt;
+
 /**
  * Une voie peut être ouverte à plusieurs. La saisie est libre et les deux
  * séparateurs se sont installés à l'usage, "&" l'emportant sur "+".
@@ -26,4 +29,4 @@ export const openedLines = (lines: Route[][]): Route[][] =>
 	lines.map((line) => line.filter((route) => !route.toOpen));
 
 export const plannedRoutes = (lines: Route[][]): RouteWithLineIndex[] =>
-	withLineIndex(lines).filter((route) => route.toOpen && !route.deletedAt);
+	withLineIndex(lines).filter((route) => route.toOpen && isLive(route));

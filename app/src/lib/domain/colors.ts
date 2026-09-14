@@ -15,12 +15,10 @@ export const colors = [
 
 export type Color = (typeof colors)[number];
 
-export const isColor = (value: string): value is Color => colors.includes(value as Color);
-
 const LIGHT: readonly Color[] = ['blanc', 'jaune', 'orange', 'beige', 'vert-2'];
 const DARK: readonly Color[] = ['noir', 'bleu', 'violet', 'rouge', 'vert'];
 
-export const isLight = (color: Color) => LIGHT.includes(color);
+const isLight = (color: Color) => LIGHT.includes(color);
 export const isDark = (color: Color) => DARK.includes(color);
 
 const BG: Record<Color, string> = {
@@ -38,9 +36,13 @@ const BG: Record<Color, string> = {
 	beige: 'bg-beige'
 };
 
-export const getBg = (color: Color) => BG[color];
+const getBg = (color: Color) => BG[color];
 
-export const getTextColor = (color: Color) => (isDark(color) ? 'text-white' : 'text-black');
+const getTextColor = (color: Color) => (isDark(color) ? 'text-white' : 'text-black');
+
+export const getSwatch = (color: Color) => `${getBg(color)} ${getTextColor(color)}`;
+
+export const getInkHex = (color: Color) => (isDark(color) ? '#fff' : '#000');
 
 export const getBorderColor = (color: Color) => (isLight(color) ? 'border-black' : 'border-white');
 

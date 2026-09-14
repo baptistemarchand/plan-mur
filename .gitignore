@@ -11,9 +11,7 @@ _fresh/
 # Nouvelle app SvelteKit
 app/node_modules/
 app/.svelte-kit/
-app/build/
 app/.wrangler/
-app/local.db
 
 # Dumps Deno KV bruts et SQL d'import qui en dérive : régénérés à la demande,
 # et ils contiennent les prénoms des ouvreurs.

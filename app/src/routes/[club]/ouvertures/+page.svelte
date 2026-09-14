@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { getBg, getTextColor } from '$lib/domain/colors';
+	import ColorChip from '$lib/components/ColorChip.svelte';
+	import ErrorBox from '$lib/components/ErrorBox.svelte';
 
 	let { data, form } = $props();
 
@@ -18,9 +19,7 @@
 		</div>
 
 		{#if form?.message}
-			<div class="mt-4 border-2 border-red-600 bg-red-50 text-red-900 rounded px-3 py-2">
-				{form.message}
-			</div>
+			<ErrorBox>{form.message}</ErrorBox>
 		{/if}
 
 		{#if data.planned.length > 0}
@@ -41,13 +40,7 @@
 					{#each data.planned as route (route.id)}
 						<div class="flex items-center gap-3 border-b border-gray-200 py-3">
 							<div class="w-16">ligne {route.lineIndex + 1}</div>
-							<div
-								class="border border-black rounded px-2 w-24 text-center {getBg(
-									route.color
-								)} {getTextColor(route.color)}"
-							>
-								{route.color}
-							</div>
+							<ColorChip color={route.color} classes="w-24 text-center" />
 							<div class="text-xl font-semibold w-16">{route.grade}</div>
 							<div class="flex-1 text-right">
 								{#if route.author}

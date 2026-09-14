@@ -1,4 +1,6 @@
 <script lang="ts">
+	import ToggleButton from './ToggleButton.svelte';
+
 	// Les popups date et ouvreur étaient deux copies du même écran dans la
 	// version Fresh : liste des valeurs déjà utilisées, puis saisie libre.
 	let {
@@ -21,13 +23,9 @@
 <div class="h-full absolute w-full">
 	<div class="grid bg-black grid-rows-5 grid-flow-col gap-px h-4/5 w-full">
 		{#each values as value (value)}
-			<button
-				type="button"
-				class="flex items-center justify-center {current === value ? 'bg-gray-300' : 'bg-white'}"
-				onclick={() => onpick(value)}
-			>
+			<ToggleButton selected={current === value} onclick={() => onpick(value)}>
 				{value}
-			</button>
+			</ToggleButton>
 		{/each}
 	</div>
 	<div class="bg-white flex flex-col h-2/5 border-t border-black pt-4">

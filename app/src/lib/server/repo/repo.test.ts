@@ -3,11 +3,10 @@ import SQLite from 'better-sqlite3';
 import { Kysely, SqliteDialect } from 'kysely';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Club, Route } from '$lib/domain/types';
-import type { Atomic } from '../db/client';
-import { UNKNOWN_DELETION_DATE, type Database } from '../db/schema';
+import type { Database } from '../db/schema';
 import { getClubBySlug, listClubs } from './clubs';
 import { claimRoute, releaseRoute } from './openings';
-import { getWall, listSessions, saveWall } from './walls';
+import { getWall, listSessions, saveRoute, type PositionedRoute } from './walls';
 
 // Ces tests valident les requêtes sur SQLite, pas les particularités de D1
 // (absence de transaction interactive, exécution en lot). Ce qui passe ici
@@ -15,10 +14,9 @@ import { getWall, listSessions, saveWall } from './walls';
 const migration = readFileSync('migrations/0001_initial.sql', 'utf8');
 
 let db: Kysely<Database>;
-let atomic: Atomic;
 let club: Club;
 
-const route = (over: Partial<Route> & { id: string }): Route => ({
+const route = (over: Partial<PositionedRoute> & { id: string }): PositionedRoute => ({
 	color: 'bleu',
 	grade: '6a',
 	setAt: null,
@@ -26,27 +24,26 @@ const route = (over: Partial<Route> & { id: string }): Route => ({
 	toRemove: false,
 	toOpen: false,
 	deletedAt: null,
+	lineIndex: 0,
+	position: 0,
 	...over
 });
+
+const put = (over: Partial<PositionedRoute> & { id: string }) => saveRoute(db, club, route(over));
+
+const ids = (lines: Route[][]) => lines.map((line) => line.map((r) => r.id));
 
 beforeEach(async () => {
 	const sqlite = new SQLite(':memory:');
 	sqlite.pragma('foreign_keys = ON');
 	sqlite.exec(migration);
 	db = new Kysely<Database>({ dialect: new SqliteDialect({ database: sqlite }) });
-	atomic = (build) =>
-		db.transaction().execute(async (trx) => {
-			for (const query of build(trx)) {
-				await query.execute();
-			}
-		});
 
 	await db
 		.insertInto('club')
 		.values({
 			slug: 'picetcol',
 			name: 'Pic et col',
-			lineCount: 3,
 			maxLines: 24,
 			passwordHash: 'x',
 			createdAt: new Date().toISOString(),
@@ -59,7 +56,7 @@ beforeEach(async () => {
 
 describe('clubs', () => {
 	it('résout un club par son slug', () => {
-		expect(club).toMatchObject({ slug: 'picetcol', name: 'Pic et col', lineCount: 3, maxLines: 24 });
+		expect(club).toMatchObject({ slug: 'picetcol', name: 'Pic et col', maxLines: 24 });
 	});
 
 	it('ne résout pas un slug inconnu', async () => {
@@ -72,127 +69,6 @@ describe('clubs', () => {
 			.values({ slug: 'a', name: 'Alpha', passwordHash: 'x', createdAt: '2020', deletedAt: null })
 			.execute();
 		expect((await listClubs(db)).map((c) => c.slug)).toEqual(['a', 'picetcol']);
-	});
-});
-
-describe('getWall', () => {
-	it('rend les lignes déclarées par le club, même vides', async () => {
-		const wall = await getWall(db, club);
-		expect(wall.lines).toEqual([[], [], []]);
-		expect(wall.revision).toBe(0);
-	});
-
-	it("garde une ligne vide ajoutée par l'éditeur", async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a' })], [], [], []], 0);
-		expect((await getWall(db, club)).lines).toHaveLength(4);
-	});
-
-	it("place chaque voie sur sa ligne, dans l'ordre", async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a' }), route({ id: 'b' })], [], [route({ id: 'c' })]], 0);
-		const wall = await getWall(db, club);
-		expect(wall.lines.map((line) => line.map((r) => r.id))).toEqual([['a', 'b'], [], ['c']]);
-	});
-
-	it('rend une voie dans la forme exacte du domaine', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a', setAt: '2025 oct', toRemove: true })]], 0);
-		const [[saved]] = (await getWall(db, club)).lines;
-		expect(saved).toEqual({
-			id: 'a',
-			color: 'bleu',
-			grade: '6a',
-			setAt: '2025 oct',
-			author: null,
-			toRemove: true,
-			toOpen: false,
-			deletedAt: null
-		});
-	});
-});
-
-describe('saveWall', () => {
-	it('incrémente la révision', async () => {
-		expect(await saveWall(db, atomic, club, [[route({ id: 'a' })]], 0)).toBe(1);
-		expect((await getWall(db, club)).revision).toBe(1);
-	});
-
-	it('refuse une écriture fondée sur une révision périmée', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 0);
-		expect(await saveWall(db, atomic, club, [[route({ id: 'b' })]], 0)).toBeUndefined();
-	});
-
-	it('ne touche à rien quand la révision est périmée', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 0);
-		await saveWall(db, atomic, club, [[route({ id: 'b' })]], 0);
-		expect((await getWall(db, club)).lines.flat().map((r) => r.id)).toEqual(['a']);
-	});
-
-	it('met à jour une voie existante sans la dupliquer', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a', grade: '6a' })]], 0);
-		await saveWall(db, atomic, club, [[route({ id: 'a', grade: '7b' })]], 1);
-		const routes = (await getWall(db, club)).lines.flat();
-		expect(routes).toHaveLength(1);
-		expect(routes[0].grade).toBe('7b');
-	});
-
-	it("déplace une voie d'une ligne à l'autre", async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a' })], []], 0);
-		await saveWall(db, atomic, club, [[], [route({ id: 'a' })]], 1);
-		// Le mur suit ce que l'éditeur envoie : deux lignes envoyées, deux lignes rendues.
-		expect((await getWall(db, club)).lines.map((l) => l.map((r) => r.id))).toEqual([[], ['a']]);
-	});
-
-	it('marque supprimée une voie absente du nouveau mur', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a' }), route({ id: 'b' })]], 0);
-		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 1);
-		const routes = (await getWall(db, club)).lines.flat();
-		expect(routes.find((r) => r.id === 'b')?.deletedAt).toEqual(expect.any(String));
-	});
-
-	it('marque supprimée toute voie quand le mur est vidé', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 0);
-		await saveWall(db, atomic, club, [[]], 1);
-		expect((await getWall(db, club)).lines.flat()[0].deletedAt).toEqual(expect.any(String));
-	});
-});
-
-// D1 plafonne le nombre de paramètres liés par requête, bien plus bas que
-// SQLite. Un upsert multi-lignes passait en local et cassait en production.
-describe('suppression logique', () => {
-	const deletionDate = async (id: string) =>
-		(
-			await db.selectFrom('route').select('deletedAt').where('id', '=', id).executeTakeFirst()
-		)?.deletedAt;
-
-	const DELETED_ON = '2024-03-02T10:00:00.000Z';
-
-	it('écrit la date reçue, sans la réinterpréter', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a', deletedAt: DELETED_ON })]], 0);
-		expect(await deletionDate('a')).toBe(DELETED_ON);
-	});
-
-	// L'éditeur renvoie le mur entier à chaque sauvegarde : la date fait
-	// l'aller-retour, elle n'est donc jamais remise à l'heure en chemin.
-	it('laisse la date intacte au fil des sauvegardes', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a', deletedAt: DELETED_ON })]], 0);
-		await saveWall(db, atomic, club, [[route({ id: 'a', deletedAt: DELETED_ON })]], 1);
-		expect(await deletionDate('a')).toBe(DELETED_ON);
-	});
-
-	it("garde l'époque Unix des voies reprises de Deno KV", async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a', deletedAt: UNKNOWN_DELETION_DATE })]], 0);
-		expect(await deletionDate('a')).toBe(UNKNOWN_DELETION_DATE);
-	});
-
-	it('efface la date si la voie revient au mur', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a', deletedAt: DELETED_ON })]], 0);
-		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 1);
-		expect(await deletionDate('a')).toBeNull();
-	});
-
-	it('date les voies disparues du payload au moment de la sauvegarde', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a' }), route({ id: 'b' })]], 0);
-		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 1);
-		expect(await deletionDate('b')).toEqual(expect.any(String));
 	});
 });
 
@@ -214,58 +90,119 @@ describe('clubs supprimés', () => {
 	});
 });
 
-describe('limites de D1', () => {
-	const D1_BOUND_PARAMETER_BUDGET = 90;
-
-	it('ne produit aucune requête au-delà du budget de paramètres', async () => {
-		const captured: number[] = [];
-		const spy: Atomic = (build) =>
-			atomic((ex) => {
-				const queries = build(ex);
-				for (const query of queries) {
-					captured.push(query.compile().parameters.length);
-				}
-				return queries;
-			});
-
-		const wide = Array.from({ length: 120 }, (_, i) => route({ id: `r${i}` }));
-		await saveWall(db, spy, club, [wide], 0);
-
-		expect(captured.length).toBeGreaterThan(0);
-		expect(Math.max(...captured)).toBeLessThanOrEqual(D1_BOUND_PARAMETER_BUDGET);
+describe('getWall', () => {
+	it("rend un mur vide quand le club n'a aucune voie", async () => {
+		expect(await getWall(db, club)).toEqual([]);
 	});
 
-	it('émet une instruction par voie, plus une par orpheline', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a' }), route({ id: 'b' })]], 0);
+	it("place chaque voie sur sa ligne, dans l'ordre", async () => {
+		await put({ id: 'b', lineIndex: 0, position: 1 });
+		await put({ id: 'a', lineIndex: 0, position: 0 });
+		await put({ id: 'c', lineIndex: 2, position: 0 });
+		expect(ids(await getWall(db, club))).toEqual([['a', 'b'], [], ['c']]);
+	});
 
-		let count = 0;
-		const spy: Atomic = (build) =>
-			atomic((ex) => {
-				const queries = build(ex);
-				count = queries.length;
-				return queries;
-			});
+	// Le nombre de lignes se déduit des voies : une ligne ajoutée dans
+	// l'éditeur et laissée vide n'existe nulle part en base.
+	it("ne garde pas une ligne restée vide", async () => {
+		await put({ id: 'a', lineIndex: 0 });
+		expect(await getWall(db, club)).toHaveLength(1);
+	});
 
-		// Deux voies envoyées dont une nouvelle, une disparue : 2 upserts + 1 orpheline.
-		await saveWall(db, spy, club, [[route({ id: 'a' }), route({ id: 'c' })]], 1);
-		expect(count).toBe(3);
+	it('garde une ligne dont toutes les voies sont supprimées', async () => {
+		await put({ id: 'a', lineIndex: 0 });
+		await put({ id: 'b', lineIndex: 1, deletedAt: '2024-03-02T10:00:00.000Z' });
+		expect(await getWall(db, club)).toHaveLength(2);
+	});
+
+	it('rend une voie dans la forme exacte du domaine', async () => {
+		await put({ id: 'a', setAt: '2025 oct', toRemove: true });
+		const [[saved]] = await getWall(db, club);
+		expect(saved).toEqual({
+			id: 'a',
+			color: 'bleu',
+			grade: '6a',
+			setAt: '2025 oct',
+			author: null,
+			toRemove: true,
+			toOpen: false,
+			deletedAt: null
+		});
+	});
+});
+
+describe('saveRoute', () => {
+	it('crée une voie absente', async () => {
+		expect(await put({ id: 'a' })).toBe(true);
+		expect(ids(await getWall(db, club))).toEqual([['a']]);
+	});
+
+	it('met à jour une voie existante sans la dupliquer', async () => {
+		await put({ id: 'a', grade: '6a' });
+		await put({ id: 'a', grade: '7b' });
+		const routes = (await getWall(db, club)).flat();
+		expect(routes).toHaveLength(1);
+		expect(routes[0].grade).toBe('7b');
+	});
+
+	it("déplace une voie d'une ligne à l'autre", async () => {
+		await put({ id: 'a', lineIndex: 0 });
+		await put({ id: 'a', lineIndex: 1 });
+		expect(ids(await getWall(db, club))).toEqual([[], ['a']]);
+	});
+
+	// Le conflit d'upsert porte sur route.id seul : sans le garde-fou sur
+	// clubId, un identifiant deviné ferait migrer la voie d'un club à l'autre.
+	it("refuse un identifiant qui appartient à un autre club", async () => {
+		await put({ id: 'a' });
+		const autre: Club = { ...club, id: club.id + 1 };
+
+		expect(await saveRoute(db, autre, route({ id: 'a', grade: '9c' }))).toBe(false);
+		expect((await getWall(db, club)).flat()[0].grade).toBe('6a');
+	});
+
+	it("n'écrase pas les autres voies de la ligne", async () => {
+		await put({ id: 'a', position: 0, author: 'seb' });
+		await put({ id: 'b', position: 1 });
+		expect((await getWall(db, club)).flat()[0].author).toBe('seb');
+	});
+});
+
+describe('suppression logique', () => {
+	const DELETED_ON = '2024-03-02T10:00:00.000Z';
+
+	const deletionDate = async (id: string) =>
+		(await db.selectFrom('route').select('deletedAt').where('id', '=', id).executeTakeFirst())
+			?.deletedAt;
+
+	// C'est l'éditeur qui horodate. Le serveur écrit ce qu'il reçoit, sans
+	// jamais remettre la date à l'heure en chemin.
+	it('écrit la date reçue, sans la réinterpréter', async () => {
+		await put({ id: 'a', deletedAt: DELETED_ON });
+		expect(await deletionDate('a')).toBe(DELETED_ON);
+	});
+
+	it('efface la date si la voie revient au mur', async () => {
+		await put({ id: 'a', deletedAt: DELETED_ON });
+		await put({ id: 'a' });
+		expect(await deletionDate('a')).toBeNull();
 	});
 });
 
 describe('claimRoute', () => {
 	beforeEach(async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a', toOpen: true })]], 0);
+		await put({ id: 'a', toOpen: true });
 	});
 
 	it('inscrit un ouvreur sur une voie libre', async () => {
 		expect(await claimRoute(db, club, 'a', 'seb')).toBe(true);
-		expect((await getWall(db, club)).lines.flat()[0].author).toBe('seb');
+		expect((await getWall(db, club)).flat()[0].author).toBe('seb');
 	});
 
 	it('refuse une voie déjà prise sans écraser le premier inscrit', async () => {
 		await claimRoute(db, club, 'a', 'seb');
 		expect(await claimRoute(db, club, 'a', 'lea')).toBe(false);
-		expect((await getWall(db, club)).lines.flat()[0].author).toBe('seb');
+		expect((await getWall(db, club)).flat()[0].author).toBe('seb');
 	});
 
 	it('libère une voie et la rend reprenable', async () => {
@@ -281,13 +218,10 @@ describe('claimRoute', () => {
 
 describe('listSessions', () => {
 	it('dédoublonne et rend les sessions les plus récentes en premier', async () => {
-		await saveWall(db, atomic, club,
-			[
-				[route({ id: 'a', setAt: '2021 oct' }), route({ id: 'b', setAt: '2025 oct' })],
-				[route({ id: 'c', setAt: '2021 oct' }), route({ id: 'd' })]
-			],
-			0
-		);
+		await put({ id: 'a', setAt: '2021 oct' });
+		await put({ id: 'b', setAt: '2025 oct', position: 1 });
+		await put({ id: 'c', setAt: '2021 oct', lineIndex: 1 });
+		await put({ id: 'd', lineIndex: 1, position: 1 });
 		expect(await listSessions(db, club)).toEqual(['2025 oct', '2021 oct']);
 	});
 });

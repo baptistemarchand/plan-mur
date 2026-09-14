@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Breakdown from '$lib/components/Breakdown.svelte';
 	import RouteCard from '$lib/components/RouteCard.svelte';
-	import { getBg, getTextColor } from '$lib/domain/colors';
-	import { getAuthors, openedLines, plannedRoutes, withLineIndex } from '$lib/domain/routes';
+	import ColorChip from '$lib/components/ColorChip.svelte';
+	import { getAuthors, isLive, openedLines, plannedRoutes, withLineIndex } from '$lib/domain/routes';
 	import {
 		byCountDesc,
 		byLine,
@@ -21,7 +21,7 @@
 	// barrées. `live` est le sous-ensemble réellement au mur aujourd'hui.
 	const lines = $derived(openedLines(data.lines));
 	const routes = $derived(withLineIndex(lines));
-	const live = $derived(routes.filter((route) => !route.deletedAt));
+	const live = $derived(routes.filter(isLive));
 	const planned = $derived(plannedRoutes(data.lines));
 	const suggestions = $derived(getSuggestions(lines));
 </script>
@@ -31,7 +31,7 @@
 		<div>
 			<div class="text-center text-xl mb-2">{i + 1}</div>
 			<div class="border border-black">
-				{#each line.filter((route) => !route.deletedAt) as route (route.id)}
+				{#each line.filter(isLive) as route (route.id)}
 					<div class="w-24 h-28"><RouteCard {route} variant="small" /></div>
 				{/each}
 			</div>
@@ -75,7 +75,7 @@
 		<Breakdown
 			label="À démonter"
 			showTotal
-			routes={routes.filter((route) => !route.deletedAt && route.toRemove)}
+			routes={live.filter((route) => route.toRemove)}
 			getBuckets={(route) => [lineLabel(route)]}
 			sortBy={byLine}
 		/>
@@ -106,13 +106,7 @@
 			<div>(Part du principe que les voies marquées "à démonter" sont démontées)</div>
 			{#each suggestions as suggestion (suggestion.color)}
 				<div class="flex mt-1">
-					<div
-						class="border border-black mr-2 px-2 rounded {getBg(suggestion.color)} {getTextColor(
-							suggestion.color
-						)}"
-					>
-						{suggestion.color}
-					</div>
+					<ColorChip color={suggestion.color} classes="mr-2" />
 					{suggestion.lines.join(', ')}
 				</div>
 			{/each}

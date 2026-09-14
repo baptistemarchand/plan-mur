@@ -1,4 +1,5 @@
 import { colors, type Color } from './colors';
+import { isLive } from './routes';
 import type { Route } from './types';
 
 /** Une ligne accueille 5 voies, comme dans l'éditeur. */
@@ -17,13 +18,13 @@ export const getSuggestions = (lines: Route[][]): Suggestion[] => {
 			return true;
 		}
 		return lines[lineIndex].every(
-			(route) => route.color !== color || route.toRemove || route.deletedAt
+			(route) => route.color !== color || route.toRemove || !isLive(route)
 		);
 	};
 
 	const canSet = (color: Color, lineIndex: number) => {
 		// Une voie supprimée ou à démonter n'occupe plus la ligne.
-		const occupied = lines[lineIndex].filter((route) => !route.toRemove && !route.deletedAt);
+		const occupied = lines[lineIndex].filter((route) => !route.toRemove && isLive(route));
 		if (occupied.length >= MAX_ROUTES_PER_LINE) {
 			return false;
 		}

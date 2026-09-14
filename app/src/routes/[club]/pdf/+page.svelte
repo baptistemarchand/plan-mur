@@ -1,4 +1,6 @@
 <script lang="ts">
+	import ErrorBox from '$lib/components/ErrorBox.svelte';
+	import { isLive } from '$lib/domain/routes';
 	import type { Route } from '$lib/domain/types';
 
 	let { data } = $props();
@@ -15,7 +17,7 @@
 	// Une voie supprimée n'est plus au mur : lui imprimer une étiquette n'a
 	// pas de sens. La version Fresh ne faisait pas ce tri.
 	const routes = $derived(
-		data.lines.flat().filter((route: Route) => !route.deletedAt && route.setAt === session)
+		data.lines.flat().filter((route: Route) => isLive(route) && route.setAt === session)
 	);
 
 	const build = async () => {
@@ -84,9 +86,7 @@
 		</button>
 
 		{#if failure}
-			<div class="mt-4 border-2 border-red-600 bg-red-50 text-red-900 rounded px-3 py-2">
-				Échec de la génération : {failure}
-			</div>
+			<ErrorBox>Échec de la génération : {failure}</ErrorBox>
 		{/if}
 	{/if}
 

@@ -7,8 +7,8 @@ import type { Actions, PageServerLoad } from './$types';
 const MAX_NAME_LENGTH = 40;
 
 export const load: PageServerLoad = async ({ locals }) => {
-	const wall = await getWall(locals.db, locals.club!);
-	return { planned: plannedRoutes(wall.lines) };
+	const lines = await getWall(locals.db, locals.club!);
+	return { planned: plannedRoutes(lines) };
 };
 
 export const actions: Actions = {

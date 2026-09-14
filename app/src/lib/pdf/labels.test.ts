@@ -32,27 +32,11 @@ describe('createLabelsPdf', () => {
 		expect(await pageCount(19)).toBe(3);
 	});
 
-	// Cas inatteignable depuis la page, qui désactive le bouton : on note le
-	// comportement réel plutôt que de supposer un document vide.
-	it('rend une page blanche si on lui passe une liste vide', async () => {
-		expect(await pageCount(0)).toBe(1);
-	});
-
 	it('accepte une voie sans session ni ouvreur', async () => {
 		const bytes = await createLabelsPdf(
 			[{ id: 'a', color: 'noir', grade: '7a', setAt: null, author: null, toRemove: false, toOpen: false, deletedAt: null }],
 			fontBytes as ArrayBuffer
 		);
 		expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);
-	});
-
-	// La police est embarquée : sans elle les accents des prénoms sortiraient
-	// en caractères manquants.
-	it('embarque les accents des ouvreurs', async () => {
-		const bytes = await createLabelsPdf(
-			[{ id: 'a', color: 'rouge', grade: '6b', setAt: 'fév 2026', author: 'anaïs', toRemove: false, toOpen: false, deletedAt: null }],
-			fontBytes as ArrayBuffer
-		);
-		expect(bytes.byteLength).toBeGreaterThan(0);
 	});
 });

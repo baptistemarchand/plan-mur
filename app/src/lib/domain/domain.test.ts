@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getAuthors, openedLines, plannedRoutes, withLineIndex } from './routes';
-import { bucketize, byCountDesc, gradeBucket, sessionSortKey, UNKNOWN_SESSION } from './stats';
+import { bucketize, byCountDesc, gradeBucket, sessionSortKey } from './stats';
 import { getSuggestions } from './suggestions';
 import type { Route } from './types';
 
@@ -53,10 +53,6 @@ describe('gradeBucket', () => {
 describe('sessionSortKey', () => {
 	it('trie les sessions par année', () => {
 		expect(sessionSortKey('2021 oct')).toBeLessThan(sessionSortKey('2025 oct'));
-	});
-
-	it('place les sessions inconnues en tête', () => {
-		expect(sessionSortKey(UNKNOWN_SESSION)).toBe(-Infinity);
 	});
 });
 

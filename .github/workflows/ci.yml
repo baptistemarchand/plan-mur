@@ -26,22 +26,19 @@ jobs:
       - name: Build Cloudflare
         run: npm run build
 
-      - name: Taille du bundle Worker
+      # Dry-run seulement : rien n'est déployé et aucun budget de taille n'est
+      # imposé, c'est l'empaquetage Worker qui est vérifié.
+      - name: Empaquetage Worker
         run: npx wrangler deploy --dry-run --outdir=/tmp/worker
 
-      # La cible self-host est construite ET démarrée : un build qui passe ne
-      # prouve rien, c'est à l'exécution que les modules natifs se plaignent.
-      - name: Build Node
-        run: npm run build:node
-
-      - name: Smoke test de la cible Node
+      # Le Worker est démarré, pas seulement construit : un build qui passe ne
+      # prouve rien, c'est workerd qui décide à l'exécution.
+      - name: Smoke test sous workerd
         run: |
-          npm run db:migrate
-          DATABASE_PATH=ci.db PORT=3099 node build/index.js &
-          for i in $(seq 1 20); do
+          npx wrangler d1 migrations apply plan-mur
+          npx wrangler dev --port 3099 &
+          for i in $(seq 1 30); do
             curl -sf -o /dev/null http://localhost:3099/ && break
-            sleep 1
+            sleep 2
           done
-          curl -sf -o /dev/null http://localhost:3099/ || { echo "la cible Node ne répond pas"; exit 1; }
-        env:
-          DATABASE_PATH: ci.db
+          curl -sf -o /dev/null http://localhost:3099/ || { echo "le Worker ne répond pas"; exit 1; }

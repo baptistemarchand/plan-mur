@@ -1,10 +1,5 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
-	import Calendar from '$lib/components/Calendar.svelte';
-	import Construction from '$lib/components/Construction.svelte';
-	import Person from '$lib/components/Person.svelte';
-	import Tools from '$lib/components/Tools.svelte';
-	import Trashcan from '$lib/components/Trashcan.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import type { Club, Route } from '$lib/domain/types';
 	import ActionButton from './ActionButton.svelte';
 	import ColorPicker from './ColorPicker.svelte';
@@ -14,38 +9,17 @@
 	import PickerPopup from './PickerPopup.svelte';
 	import { EditorState, setEditorState } from './state.svelte';
 
-	let { club, lines, revision }: { club: Club; lines: Route[][]; revision: number } = $props();
+	let { club, lines }: { club: Club; lines: Route[][] } = $props();
 
 	// L'éditeur s'approprie l'état au montage et devient la source de vérité :
 	// les props ne sont qu'une graine. La page remonte le composant quand on
 	// change de club, cf. le {#key} dans +page.svelte.
 	// svelte-ignore state_referenced_locally
-	const state = new EditorState(club, lines, revision);
+	const state = new EditorState(club, lines);
 	setEditorState(state);
 
-	// Seul `lines` doit déclencher une synchro : untrack garde le corps hors du
-	// graphe de dépendances, sinon toute lecture réactive qu'il ferait
-	// relancerait l'effet à chaque synchro et écrirait le mur en boucle.
-	// Le premier passage est le rendu initial, pas une modification.
-	let initial = true;
-	$effect(() => {
-		state.lines;
-		untrack(() => {
-			if (initial) {
-				initial = false;
-				return;
-			}
-			state.markDirty();
-		});
-	});
-
 	const indicator = $derived(
-		{
-			DIRTY: 'bg-yellow-300',
-			LOADING: 'bg-yellow-500',
-			SYNCED: 'bg-green-400',
-			CONFLICT: 'bg-red-500'
-		}[state.syncState]
+		{ SAVING: 'bg-yellow-500', SAVED: 'bg-green-400', FAILED: 'bg-red-500' }[state.saveState]
 	);
 </script>
 
@@ -77,10 +51,9 @@
 
 	<div class="{indicator} h-1"></div>
 
-	{#if state.syncState === 'CONFLICT'}
+	{#if state.saveState === 'FAILED'}
 		<div class="bg-red-500 text-white text-center py-2 text-lg">
-			Le mur a été modifié ailleurs. Recharge la page, tes dernières retouches ne sont pas
-			enregistrées.
+			Ta dernière retouche n'a pas été enregistrée. Vérifie la connexion, puis refais-la.
 		</div>
 	{/if}
 
@@ -99,7 +72,7 @@
 						classes="bg-green-500 text-white"
 						onclick={() => (state.setAtPopup = true)}
 					>
-						{#snippet icon()}<Calendar color="#fff" size="30px" />{/snippet}
+						{#snippet icon()}<Icon name="calendar" color="#fff" size="30px" />{/snippet}
 					</ActionButton>
 
 					<ActionButton
@@ -107,7 +80,7 @@
 						classes="bg-blue-500 text-white"
 						onclick={() => (state.authorPopup = true)}
 					>
-						{#snippet icon()}<Person color="#fff" size="30px" />{/snippet}
+						{#snippet icon()}<Icon name="person" color="#fff" size="30px" />{/snippet}
 					</ActionButton>
 
 					<ActionButton
@@ -117,7 +90,11 @@
 							: 'bg-yellow-500 text-white'}"
 						onclick={() => state.updateCurrent((r) => ({ toRemove: !r.toRemove }))}
 					>
-						{#snippet icon()}<Tools color={route.toRemove ? '#f59e0b' : '#fff'} size="30px" />{/snippet}
+						{#snippet icon()}<Icon
+								name="tools"
+								color={route.toRemove ? '#f59e0b' : '#fff'}
+								size="30px"
+							/>{/snippet}
 					</ActionButton>
 
 					<ActionButton
@@ -127,7 +104,8 @@
 							: 'bg-purple-600 text-white'}"
 						onclick={() => state.updateCurrent((r) => ({ toOpen: !r.toOpen }))}
 					>
-						{#snippet icon()}<Construction
+						{#snippet icon()}<Icon
+								name="construction"
 								color={route.toOpen ? '#9333ea' : '#fff'}
 								size="30px"
 							/>{/snippet}
@@ -138,7 +116,7 @@
 						classes="bg-red-500 text-white"
 						onclick={() => state.deleteCurrent()}
 					>
-						{#snippet icon()}<Trashcan color="#fff" size="30px" />{/snippet}
+						{#snippet icon()}<Icon name="trashcan" color="#fff" size="30px" />{/snippet}
 					</ActionButton>
 				{/if}
 			</div>

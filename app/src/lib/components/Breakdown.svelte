@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { getBg, getTextColor, isDark } from '$lib/domain/colors';
-	import type { RouteWithLineIndex } from '$lib/domain/routes';
+	import { getInkHex, getSwatch } from '$lib/domain/colors';
+	import { isLive, type RouteWithLineIndex } from '$lib/domain/routes';
 	import { bucketize, type Bucket } from '$lib/domain/stats';
 
 	let {
@@ -31,20 +31,17 @@
 			<div class="mr-3">{bucket.label}</div>
 			{#each bucket.items as route}
 				<div
-					class="relative overflow-hidden text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center {getBg(
+					class="relative overflow-hidden text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center {getSwatch(
 						route.color
-					)} {getTextColor(route.color)} {route.deletedAt ? 'line-through' : ''} {showTaken &&
-					route.author
-						? 'cursor-help'
-						: ''}"
+					)} {isLive(route) ? '' : 'line-through'} {showTaken && route.author ? 'cursor-help' : ''}"
 					title={showTaken ? route.author : undefined}
 				>
 					{#if showTaken && route.author}
 						<div
 							class="absolute top-0 left-0"
-							style="border-top: 10px solid {isDark(route.color)
-								? '#fff'
-								: '#000'}; border-right: 10px solid transparent;"
+							style="border-top: 10px solid {getInkHex(
+								route.color
+							)}; border-right: 10px solid transparent;"
 						></div>
 					{/if}
 					{route.grade}

@@ -1,11 +1,11 @@
+import type { Kysely } from 'kysely';
 import type { Club } from '$lib/domain/types';
-import type { Atomic, Db } from '$lib/server/db/client';
+import type { Database } from '$lib/server/db/schema';
 
 declare global {
 	namespace App {
 		interface Locals {
-			db: Db['kysely'];
-			atomic: Atomic;
+			db: Kysely<Database>;
 			/** Le club de l'URL, résolu depuis son slug. Absent hors des routes /[club]. */
 			club?: Club;
 		}

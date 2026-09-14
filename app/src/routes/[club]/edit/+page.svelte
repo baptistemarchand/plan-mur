@@ -5,5 +5,5 @@
 </script>
 
 {#key data.club.slug}
-	<Editor club={data.club} lines={data.lines} revision={data.revision} />
+	<Editor club={data.club} lines={data.lines} />
 {/key}

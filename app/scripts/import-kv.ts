@@ -6,7 +6,13 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { customAlphabet } from 'nanoid';
 import { colors, type Color } from '../src/lib/domain/colors.ts';
-import { UNKNOWN_DELETION_DATE } from '../src/lib/server/db/schema.ts';
+
+/**
+ * Date de suppression des voies reprises de Deno KV, qui ne gardait que le
+ * booléen. L'époque Unix se lit comme « supprimée, date inconnue » sans
+ * inventer une date plausible.
+ */
+const UNKNOWN_DELETION_DATE = '1970-01-01T00:00:00.000Z';
 
 type RawRoute = {
 	id?: string;
@@ -54,9 +60,9 @@ dump.clubs.forEach((entry, index) => {
 	const lines = linesBySlug.get(slug) ?? [];
 
 	statements.push(
-		`INSERT INTO club (id, slug, name, lineCount, maxLines, passwordHash, revision, createdAt, deletedAt)\n` +
+		`INSERT INTO club (id, slug, name, maxLines, passwordHash, createdAt, deletedAt)\n` +
 			`VALUES (${clubId}, ${quote(slug)}, ${quote(name)}, ` +
-			`${lines.length}, ${MAX_LINES[slug] ?? DEFAULT_MAX_LINES}, ${quote('!')}, 0, ${quote(dump.exportedAt)}, NULL);`
+			`${MAX_LINES[slug] ?? DEFAULT_MAX_LINES}, ${quote('!')}, ${quote(dump.exportedAt)}, NULL);`
 	);
 
 	lines.forEach((line, lineIndex) => {
