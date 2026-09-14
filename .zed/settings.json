@@ -1,4 +1,13 @@
 {
+	// Biome ne s'active que sur les projets qui portent un biome.json. Celui-ci
+	// n'en a pas, donc il se tait ici sans être désinstallé ailleurs.
+	"lsp": {
+		"biome": {
+			"settings": {
+				"require_config_file": true
+			}
+		}
+	},
 	"languages": {
 		"Svelte": {
 			"formatter": {
