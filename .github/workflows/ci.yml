@@ -19,12 +19,10 @@ jobs:
       - run: npm run check
       - run: npm test
 
-      - name: Build Cloudflare
-        run: npm run build
-
-      # Dry-run seulement : rien n'est déployé et aucun budget de taille n'est
-      # imposé, c'est l'empaquetage Worker qui est vérifié.
-      - name: Empaquetage Worker
+      # wrangler.jsonc porte build.command, donc cette étape construit avant
+      # d'empaqueter : inutile d'appeler `npm run build` séparément. Dry-run,
+      # rien n'est déployé et aucun budget de taille n'est imposé.
+      - name: Build et empaquetage Worker
         run: npx wrangler deploy --dry-run --outdir=/tmp/worker
 
       # Le Worker est démarré, pas seulement construit : un build qui passe ne

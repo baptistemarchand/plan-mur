@@ -126,6 +126,11 @@ wrangler d1 execute plan-mur --remote --file=seeds/import.sql
 wrangler deploy
 ```
 
+`wrangler.jsonc` porte `build.command`, donc `wrangler deploy`, `versions
+upload` et `cf:dev` construisent d'eux-mêmes. C'est ce qui permet à un build
+Cloudflare, qui part d'un simple clone, de trouver `_worker.js` : sans ça il
+échoue sur un point d'entrée absent.
+
 Le seed vient de `npm run db:import` sur un export KV frais, cf. plus bas. Les
 mots de passe de club y valent `'!'` : l'édition est à ouvrir séparément.
 
