@@ -11,7 +11,7 @@ const toRoute = (row: RouteRow): Route => ({
 	...(row.author ? { author: row.author } : {}),
 	...(row.to_remove ? { toRemove: true } : {}),
 	...(row.to_open ? { toOpen: true } : {}),
-	...(row.deleted ? { deleted: true } : {})
+	...(row.deleted_at ? { deleted: true } : {})
 });
 
 const toRow = (
@@ -19,7 +19,8 @@ const toRow = (
 	clubId: number,
 	lineIndex: number,
 	position: number,
-	now: string
+	now: string,
+	previousDeletedAt: string | null
 ): NewRouteRow => ({
 	id: route.id,
 	club_id: clubId,
@@ -31,8 +32,9 @@ const toRow = (
 	author: route.author ?? null,
 	to_remove: route.toRemove ? 1 : 0,
 	to_open: route.toOpen ? 1 : 0,
-	deleted: route.deleted ? 1 : 0,
-	deleted_at: null,
+	// Une voie déjà supprimée garde sa date d'origine : l'éditeur renvoie le
+	// mur entier à chaque sauvegarde, sans quoi elle serait remise à l'heure.
+	deleted_at: route.deleted ? (previousDeletedAt ?? now) : null,
 	updated_at: now
 });
 
@@ -100,24 +102,29 @@ export const saveWall = async (
 	}
 
 	const now = new Date().toISOString();
+
+	// Une seule lecture sert deux besoins : conserver la date de suppression
+	// des voies déjà supprimées, et repérer celles qui ont disparu du payload.
+	// La liste des identifiants ne peut pas partir dans un NOT IN, elle
+	// dépasserait le plafond de paramètres liés de D1. La révision vient d'être
+	// prise, personne d'autre n'écrit entre-temps.
+	const existing = await db
+		.selectFrom('route')
+		.select(['id', 'deleted_at'])
+		.where('club_id', '=', club.id)
+		.execute();
+	const previousDeletion = new Map(existing.map((row) => [row.id, row.deleted_at]));
+
 	const rows = lines.flatMap((line, lineIndex) =>
-		line.map((route, position) => toRow(route, club.id, lineIndex, position, now))
+		line.map((route, position) =>
+			toRow(route, club.id, lineIndex, position, now, previousDeletion.get(route.id) ?? null)
+		)
 	);
 
-	// Les voies orphelines sont identifiées ici, pas dans un NOT IN : la liste
-	// des identifiants dépasserait le plafond de paramètres liés de D1. La
-	// révision vient d'être prise, personne d'autre n'écrit entre-temps.
 	const sent = new Set(rows.map((row) => row.id));
-	const orphans = (
-		await db
-			.selectFrom('route')
-			.select('id')
-			.where('club_id', '=', club.id)
-			.where('deleted', '=', 0)
-			.execute()
-	)
-		.map((row) => row.id)
-		.filter((id) => !sent.has(id));
+	const orphans = existing
+		.filter((row) => row.deleted_at === null && !sent.has(row.id))
+		.map((row) => row.id);
 
 	await atomic((ex) => {
 		// Une instruction par voie plutôt qu'un upsert multi-lignes : D1 plafonne
@@ -138,7 +145,7 @@ export const saveWall = async (
 						author: eb.ref('excluded.author'),
 						to_remove: eb.ref('excluded.to_remove'),
 						to_open: eb.ref('excluded.to_open'),
-						deleted: eb.ref('excluded.deleted'),
+						deleted_at: eb.ref('excluded.deleted_at'),
 						updated_at: eb.ref('excluded.updated_at')
 					}))
 				)
@@ -150,7 +157,7 @@ export const saveWall = async (
 			queries.push(
 				ex
 					.updateTable('route')
-					.set({ deleted: 1, deleted_at: now, updated_at: now })
+					.set({ deleted_at: now, updated_at: now })
 					.where('id', '=', id)
 			);
 		}

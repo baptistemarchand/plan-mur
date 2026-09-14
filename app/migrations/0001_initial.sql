@@ -5,14 +5,12 @@ CREATE TABLE club (
   id            INTEGER PRIMARY KEY,
   slug          TEXT    NOT NULL UNIQUE,
   name          TEXT    NOT NULL,
-  -- Lignes que le mur compte aujourd'hui, y compris celles encore vides :
-  -- une ligne ajoutée dans l'éditeur doit survivre au rechargement.
   line_count    INTEGER NOT NULL DEFAULT 0,
-  -- Plafond que l'éditeur fait respecter. Remplace le 24/16 codé en dur.
   max_lines     INTEGER NOT NULL DEFAULT 16,
   password_hash TEXT    NOT NULL,
   revision      INTEGER NOT NULL DEFAULT 0,
-  created_at    TEXT    NOT NULL
+  created_at    TEXT    NOT NULL,
+  deleted_at    TEXT
 );
 
 CREATE TABLE route (
@@ -29,9 +27,8 @@ CREATE TABLE route (
   author     TEXT,
   to_remove  INTEGER NOT NULL DEFAULT 0,
   to_open    INTEGER NOT NULL DEFAULT 0,
-  deleted    INTEGER NOT NULL DEFAULT 0,
-  -- Nul pour les voies importées : l'historique Deno KV ne portait pas la date
-  -- de suppression, et l'inventer donnerait une donnée fausse.
+  -- Suppression logique : nul tant que la voie est au mur. L'époque Unix pour
+  -- les voies importées, dont Deno KV ne gardait pas la date de suppression.
   deleted_at TEXT,
   updated_at TEXT    NOT NULL
 );

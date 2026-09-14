@@ -18,6 +18,7 @@ export const claimRoute = async (
 		.set({ author, updated_at: new Date().toISOString() })
 		.where('id', '=', routeId)
 		.where('club_id', '=', club.id)
+		.where('deleted_at', 'is', null)
 		.where('author', 'is', null)
 		.executeTakeFirst();
 

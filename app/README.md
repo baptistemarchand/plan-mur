@@ -125,5 +125,11 @@ L'import ne normalise qu'une chose : la casse de `setAt`, incohérente en base
 alors que le filtre PDF comparait en minuscules. Il signale les identifiants
 absents ou dupliqués et les couleurs inconnues.
 
+La suppression est portée par `deleted_at` seul, nul tant que la voie est au
+mur. Deno KV ne gardait qu'un booléen : les voies déjà supprimées reçoivent
+l'époque Unix, qui se lit comme « supprimée, date inconnue » sans inventer une
+date plausible. Les suppressions faites depuis l'éditeur portent l'heure réelle
+et la gardent, même si l'éditeur renvoie le mur entier à chaque sauvegarde.
+
 Les mots de passe importés valent `'!'` : aucun hachage ne peut correspondre.
 Il faut les définir avant d'ouvrir l'accès à l'édition.

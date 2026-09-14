@@ -1,6 +1,13 @@
 import type { Generated, Insertable, Selectable, Updateable } from 'kysely';
 import type { Color } from '$lib/domain/colors';
 
+/**
+ * Date de suppression des voies reprises de Deno KV, qui ne gardait que le
+ * booléen. L'époque Unix se lit comme « supprimée, date inconnue » sans
+ * inventer une date plausible.
+ */
+export const UNKNOWN_DELETION_DATE = '1970-01-01T00:00:00.000Z';
+
 // Écrit à la main et tenu synchrone avec migrations/*.sql, qui font foi.
 export type Database = {
 	club: ClubTable;
@@ -16,6 +23,7 @@ type ClubTable = {
 	password_hash: string;
 	revision: Generated<number>;
 	created_at: string;
+	deleted_at: string | null;
 };
 
 type RouteTable = {
@@ -29,7 +37,6 @@ type RouteTable = {
 	author: string | null;
 	to_remove: Generated<number>;
 	to_open: Generated<number>;
-	deleted: Generated<number>;
 	deleted_at: string | null;
 	updated_at: string;
 };

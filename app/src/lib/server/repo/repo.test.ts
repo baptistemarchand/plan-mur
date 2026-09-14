@@ -4,7 +4,7 @@ import { Kysely, SqliteDialect } from 'kysely';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Club, Route } from '$lib/domain/types';
 import type { Atomic } from '../db/client';
-import type { Database } from '../db/schema';
+import { UNKNOWN_DELETION_DATE, type Database } from '../db/schema';
 import { getClubBySlug, listClubs } from './clubs';
 import { claimRoute, releaseRoute } from './openings';
 import { getWall, listSessions, saveWall } from './walls';
@@ -44,7 +44,8 @@ beforeEach(async () => {
 			line_count: 3,
 			max_lines: 24,
 			password_hash: 'x',
-			created_at: new Date().toISOString()
+			created_at: new Date().toISOString(),
+			deleted_at: null
 		})
 		.execute();
 
@@ -63,7 +64,7 @@ describe('clubs', () => {
 	it('trie les clubs par nom', async () => {
 		await db
 			.insertInto('club')
-			.values({ slug: 'a', name: 'Alpha', password_hash: 'x', created_at: '2020' })
+			.values({ slug: 'a', name: 'Alpha', password_hash: 'x', created_at: '2020', deleted_at: null })
 			.execute();
 		expect((await listClubs(db)).map((c) => c.slug)).toEqual(['a', 'picetcol']);
 	});
@@ -142,6 +143,76 @@ describe('saveWall', () => {
 
 // D1 plafonne le nombre de paramètres liés par requête, bien plus bas que
 // SQLite. Un upsert multi-lignes passait en local et cassait en production.
+describe('suppression logique', () => {
+	const deletionDate = async (id: string) =>
+		(
+			await db.selectFrom('route').select('deleted_at').where('id', '=', id).executeTakeFirst()
+		)?.deleted_at;
+
+	it('date la suppression au moment où elle a lieu', async () => {
+		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 0);
+		expect(await deletionDate('a')).toBeNull();
+
+		await saveWall(db, atomic, club, [[route({ id: 'a', deleted: true })]], 1);
+		expect(await deletionDate('a')).toEqual(expect.any(String));
+	});
+
+	// L'éditeur renvoie le mur entier à chaque sauvegarde : sans précaution, la
+	// date d'une voie supprimée il y a deux ans serait remise à l'heure.
+	it("garde la date d'origine à travers les sauvegardes suivantes", async () => {
+		await saveWall(db, atomic, club, [[route({ id: 'a', deleted: true })]], 0);
+		const first = await deletionDate('a');
+
+		await saveWall(db, atomic, club, [[route({ id: 'a', deleted: true })]], 1);
+		expect(await deletionDate('a')).toBe(first);
+	});
+
+	it('efface la date si la voie revient au mur', async () => {
+		await saveWall(db, atomic, club, [[route({ id: 'a', deleted: true })]], 0);
+		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 1);
+		expect(await deletionDate('a')).toBeNull();
+	});
+
+	it('conserve la date des voies importées sans la réécrire', async () => {
+		await db
+			.insertInto('route')
+			.values({
+				id: 'old',
+				club_id: club.id,
+				line_index: 0,
+				position: 0,
+				color: 'bleu',
+				grade: '6a',
+				set_at: null,
+				author: null,
+				deleted_at: UNKNOWN_DELETION_DATE,
+				updated_at: '2020'
+			})
+			.execute();
+
+		await saveWall(db, atomic, club, [[route({ id: 'old', deleted: true })]], 0);
+		expect(await deletionDate('old')).toBe(UNKNOWN_DELETION_DATE);
+	});
+});
+
+describe('clubs supprimés', () => {
+	beforeEach(async () => {
+		await db
+			.updateTable('club')
+			.set({ deleted_at: new Date().toISOString() })
+			.where('id', '=', club.id)
+			.execute();
+	});
+
+	it('ne liste pas un club supprimé', async () => {
+		expect(await listClubs(db)).toEqual([]);
+	});
+
+	it("ne résout pas le slug d'un club supprimé", async () => {
+		expect(await getClubBySlug(db, 'picetcol')).toBeUndefined();
+	});
+});
+
 describe('limites de D1', () => {
 	const D1_BOUND_PARAMETER_BUDGET = 90;
 

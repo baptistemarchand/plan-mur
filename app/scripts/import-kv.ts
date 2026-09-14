@@ -6,6 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { customAlphabet } from 'nanoid';
 import { colors, type Color } from '../src/lib/domain/colors.ts';
+import { UNKNOWN_DELETION_DATE } from '../src/lib/server/db/schema.ts';
 
 type RawRoute = {
 	id?: string;
@@ -53,9 +54,9 @@ dump.clubs.forEach((entry, index) => {
 	const lines = linesBySlug.get(slug) ?? [];
 
 	statements.push(
-		`INSERT INTO club (id, slug, name, line_count, max_lines, password_hash, revision, created_at)\n` +
+		`INSERT INTO club (id, slug, name, line_count, max_lines, password_hash, revision, created_at, deleted_at)\n` +
 			`VALUES (${clubId}, ${quote(slug)}, ${quote(name)}, ` +
-			`${lines.length}, ${MAX_LINES[slug] ?? DEFAULT_MAX_LINES}, ${quote('!')}, 0, ${quote(dump.exportedAt)});`
+			`${lines.length}, ${MAX_LINES[slug] ?? DEFAULT_MAX_LINES}, ${quote('!')}, 0, ${quote(dump.exportedAt)}, NULL);`
 	);
 
 	lines.forEach((line, lineIndex) => {
@@ -76,11 +77,15 @@ dump.clubs.forEach((entry, index) => {
 			const setAt = route.setAt?.toLowerCase().trim() || null;
 			const author = route.author?.trim() || null;
 
+			// Deno KV ne portait qu'un booléen : l'époque Unix marque la
+			// suppression sans prétendre en connaître la date.
+			const deletedAt = route.deleted ? quote(UNKNOWN_DELETION_DATE) : 'NULL';
+
 			statements.push(
-				`INSERT INTO route (id, club_id, line_index, position, color, grade, set_at, author, to_remove, to_open, deleted, deleted_at, updated_at)\n` +
+				`INSERT INTO route (id, club_id, line_index, position, color, grade, set_at, author, to_remove, to_open, deleted_at, updated_at)\n` +
 					`VALUES (${quote(id)}, ${clubId}, ${lineIndex}, ${position}, ${quote(route.color)}, ` +
 					`${quote(route.grade)}, ${quote(setAt)}, ${quote(author)}, ${route.toRemove ? 1 : 0}, ` +
-					`${route.toOpen ? 1 : 0}, ${route.deleted ? 1 : 0}, NULL, ${quote(dump.exportedAt)});`
+					`${route.toOpen ? 1 : 0}, ${deletedAt}, ${quote(dump.exportedAt)});`
 			);
 		});
 	});

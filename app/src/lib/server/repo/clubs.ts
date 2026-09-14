@@ -11,7 +11,7 @@ const toClub = (row: ClubRow): Club => ({
 });
 
 export const listClubs = async (db: Kysely<Database>): Promise<Club[]> => {
-	const rows = await db.selectFrom('club').selectAll().execute();
+	const rows = await db.selectFrom('club').selectAll().where('deleted_at', 'is', null).execute();
 	return rows.map(toClub).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
 };
 
@@ -23,6 +23,7 @@ export const getClubBySlug = async (
 		.selectFrom('club')
 		.selectAll()
 		.where('slug', '=', slug)
+		.where('deleted_at', 'is', null)
 		.executeTakeFirst();
 	return row && toClub(row);
 };
