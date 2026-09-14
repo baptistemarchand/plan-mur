@@ -40,6 +40,16 @@ KV_URL=https://api.deno.com/v2/databases/<id>/connect \
 
 Chaque commande annonce la base qu'elle vise avant d'agir.
 
+### Migration vers la nouvelle app
+
+```
+deno task export-kv                    dumpe clubs et voies en JSON dans export/
+deno task restore-kv <dump.json>       recharge un dump dans la base LOCALE
+```
+
+`restore-kv` sert à faire tourner l'ancienne et la nouvelle app sur les mêmes
+données pour les comparer. Il refuse de viser la prod.
+
 ### Commandes métier
 
 ```

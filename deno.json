@@ -6,11 +6,16 @@
     "preview": "deno run -A main.ts",
     "update": "deno run -A -r https://fresh.deno.dev/update .",
     "migrate": "deno run -A migrate.ts",
+    "export-kv": "deno run -A export-kv.ts",
+    "restore-kv": "deno run -A restore-kv.ts",
     "seed": "deno run -A seed.ts",
     "test": "deno test -A"
   },
-  "fmt": { "exclude": ["static/"] },
-  "lint": { "rules": { "tags": ["fresh", "recommended"] } },
+  "fmt": { "exclude": ["static/", "app/", "export/"] },
+  "lint": {
+    "exclude": ["app/", "export/"],
+    "rules": { "tags": ["fresh", "recommended"] }
+  },
   "imports": {
     "$fresh/": "https://deno.land/x/fresh@1.6.8/",
     "preact": "https://esm.sh/preact@10.19.6",
@@ -28,6 +33,6 @@
     "@twind/preset-autoprefix": "https://esm.sh/@twind/preset-autoprefix@1.0.7/"
   },
   "compilerOptions": { "jsx": "react-jsx", "jsxImportSource": "preact" },
-  "exclude": ["**/_fresh/*"],
+  "exclude": ["**/_fresh/*", "app/", "export/"],
   "unstable": ["kv"]
 }
