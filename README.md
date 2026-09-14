@@ -46,26 +46,5 @@ Chaque commande annonce la base qu'elle vise avant d'agir.
 deno task migrate list-clubs                            liste les clubs (slug et nom)
 deno task migrate set-club <club> <"le nom du club">    crée ou renomme un club
 deno task migrate remove-club <club>                    supprime un club et ses voies (attention, irréversible)
-deno task migrate import-clubs                          enregistre les clubs ayant des voies mais pas encore de nom
 deno task migrate list-routes <club>                    affiche les lignes d'un club
-deno task migrate regenerate-ids [club]                 réattribue un id à chaque voie
 ```
-
-## Scripts one shot
-
-### import-clubs
-
-Les clubs existaient avant le registre, en tant que simples clés
-`["lines", slug]`, on vient les créer comme entrée à part pour éviter les noms
-en dur dans le code À passer une fois en prod puis supprimer
-
-```
-deno task migrate import-clubs
-deno task migrate set-club picetcol Pic et col
-deno task migrate set-club faverges Faverges
-```
-
-### regenerate-ids
-
-A priori joué aant que les voies n'aient leur id propre, à supprimer maintenant
-je pense ?
