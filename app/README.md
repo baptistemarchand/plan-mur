@@ -1,4 +1,4 @@
-# plan-mur (SvelteKit)
+# plan-mur
 
 Réécriture de l'app Fresh/Deno KV restée à la racine du dépôt. Les deux
 coexistent jusqu'à la bascule : l'ancienne reste en production et sert de
@@ -62,11 +62,11 @@ fonctionne pas sans JavaScript.
 
 Une dépendance plateforme n'apparaît qu'à un seul endroit.
 
-| Dossier | Rôle |
-|---|---|
-| `src/lib/domain/` | TypeScript pur, testable sans base ni serveur |
-| `src/lib/server/repo/` | le seul endroit où l'on écrit des requêtes |
-| `src/lib/server/db/` | le schéma Kysely, tenu synchrone avec `migrations/` |
+| Dossier                | Rôle                                                |
+| ---------------------- | --------------------------------------------------- |
+| `src/lib/domain/`      | TypeScript pur, testable sans base ni serveur       |
+| `src/lib/server/repo/` | le seul endroit où l'on écrit des requêtes          |
+| `src/lib/server/db/`   | le schéma Kysely, tenu synchrone avec `migrations/` |
 
 Interdits, pour que la donnée reste portable et la sortie bon marché :
 
@@ -82,13 +82,13 @@ stockage sans imposer la normalisation à l'UI.
 
 ## Routes
 
-| Route | Accès |
-|---|---|
-| `/` | public |
-| `/[club]/view` | public |
-| `/[club]/ouvertures` | public |
-| `/[club]/pdf` | public |
-| `/[club]/edit` | **à protéger**, remplace l'ancien `edit2` |
+| Route                          | Accès                                           |
+| ------------------------------ | ----------------------------------------------- |
+| `/`                            | public                                          |
+| `/[club]/view`                 | public                                          |
+| `/[club]/ouvertures`           | public                                          |
+| `/[club]/pdf`                  | public                                          |
+| `/[club]/edit`                 | **à protéger**, remplace l'ancien `edit2`       |
 | `PUT /[club]/routes/[routeId]` | **à protéger**, remplace `POST /api/sync?club=` |
 
 L'authentification par mot de passe de club n'est pas encore branchée : les deux
