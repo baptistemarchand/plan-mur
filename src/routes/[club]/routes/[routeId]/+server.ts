@@ -1,10 +1,9 @@
 import {error} from '@sveltejs/kit'
 import {colors, type Color} from '$lib/domain/colors'
+import {isAuthenticated} from '$lib/server/session'
 import {saveRoute, type PositionedRoute} from '$lib/server/repo/walls'
 import type {RequestHandler} from './$types'
 
-// Rien n'authentifie encore cet appel : la validation de forme est le seul
-// rempart, et elle rejette plutôt qu'elle ne rafistole.
 const parseRoute = (value: unknown, id: string): PositionedRoute => {
   const route = value as Partial<PositionedRoute>
 
@@ -32,7 +31,13 @@ const parseRoute = (value: unknown, id: string): PositionedRoute => {
   }
 }
 
-export const PUT: RequestHandler = async ({locals, params, request}) => {
+export const PUT: RequestHandler = async event => {
+  if (!(await isAuthenticated(event))) {
+    error(401, 'Session expirée.')
+  }
+
+  const {locals, params, request} = event
+
   // Les types Workers rendent json() en `{}` : on nomme la forme attendue
   // avant de la valider, la validation restant à l'exécution.
   const body = (await request.json()) as unknown

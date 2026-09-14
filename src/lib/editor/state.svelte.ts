@@ -128,6 +128,10 @@ export class EditorState {
         }),
       )
       .then(response => {
+        if (response.status === 401) {
+          location.href = `/${this.club.slug}/login?next=${encodeURIComponent(`/${this.club.slug}/edit`)}`
+          return
+        }
         this.saveState = response.ok ? 'SAVED' : 'FAILED'
       })
       .catch(() => {
