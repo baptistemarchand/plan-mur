@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:import": "node scripts/import-kv.ts",
+    "db:seed": "node scripts/seed-dev.ts && wrangler d1 execute plan-mur --local --file=seeds/dev.sql",
     "cf:dev": "wrangler dev",
     "cf:migrate": "wrangler d1 migrations apply plan-mur",
     "cf:types": "wrangler types ./src/worker-configuration.d.ts"

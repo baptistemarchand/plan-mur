@@ -14,6 +14,12 @@ npx wrangler d1 execute plan-mur --local --file=seeds/import.sql
 npm run cf:dev                       # workerd + D1, sur le port 8787
 ```
 
+Sans export Deno KV sous la main, `npm run db:seed` remplit la base locale avec
+un club de démonstration inventé, sur `/demo`. Ses proportions (couleurs,
+cotations, sessions, co-ouvertures) suivent celles de la prod, ses prénoms non :
+le dump réel n'est pas versionné, justement parce qu'il en porte. Le script est
+déterministe et se rejoue sans créer de doublons.
+
 `npm run dev` lance Vite, plus rapide au quotidien, et **lit le même binding D1
 local** : l'adapter Cloudflare expose `platform.env` dès le serveur de
 développement.
