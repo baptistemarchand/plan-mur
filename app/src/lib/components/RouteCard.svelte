@@ -37,7 +37,7 @@
 			<Construction color={isDark(route.color) ? '#fff' : '#000'} size={big ? '28px' : '18px'} />
 		{/if}
 	</div>
-	<div class={textSize}>{route.setAt ?? ''}</div>
+	<div class={textSize}>{route.setAt}</div>
 	{#each authors as author, i (i)}
 		<div class={textSize}>{author}</div>
 	{/each}

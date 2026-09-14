@@ -33,7 +33,7 @@
 				<div
 					class="relative overflow-hidden text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center {getBg(
 						route.color
-					)} {getTextColor(route.color)} {route.deleted ? 'line-through' : ''} {showTaken &&
+					)} {getTextColor(route.color)} {route.deletedAt ? 'line-through' : ''} {showTaken &&
 					route.author
 						? 'cursor-help'
 						: ''}"

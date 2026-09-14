@@ -12,7 +12,7 @@ const SYNC_DELAY_MS = 3000;
 export type SyncState = 'DIRTY' | 'LOADING' | 'SYNCED' | 'CONFLICT';
 
 const firstRouteId = (line: Route[] = []): string | undefined =>
-	line.find((route) => !route.deleted)?.id;
+	line.find((route) => !route.deletedAt)?.id;
 
 export class EditorState {
 	lines = $state<Route[][]>([]);
@@ -38,7 +38,7 @@ export class EditorState {
 	}
 
 	currentLine = $derived(this.lines[this.selectedLine] ?? []);
-	visibleRoutes = $derived(this.currentLine.filter((route) => !route.deleted));
+	visibleRoutes = $derived(this.currentLine.filter((route) => !route.deletedAt));
 	currentRoute = $derived(this.currentLine.find((route) => route.id === this.selectedRouteId));
 	get canAddLine() {
 		return this.lines.length < this.club.maxLines;
@@ -74,7 +74,21 @@ export class EditorState {
 	addRoute() {
 		const id = nanoid();
 		this.lines = this.lines.map((routes, i) =>
-			i === this.selectedLine ? [...routes, { id, grade: '4a', color: 'blanc' as const }] : routes
+			i === this.selectedLine
+				? [
+						...routes,
+						{
+							id,
+							grade: '4a',
+							color: 'blanc' as const,
+							setAt: null,
+							author: null,
+							toRemove: false,
+							toOpen: false,
+							deletedAt: null
+						}
+					]
+				: routes
 		);
 		this.selectedRouteId = id;
 	}
@@ -90,7 +104,7 @@ export class EditorState {
 	}
 
 	deleteCurrent() {
-		this.updateCurrent(() => ({ deleted: true }));
+		this.updateCurrent(() => ({ deletedAt: new Date().toISOString() }));
 		this.selectedRouteId = firstRouteId(this.lines[this.selectedLine]);
 	}
 

@@ -21,11 +21,11 @@ const parseRoute = (value: unknown): Route => {
 		id: route.id,
 		color: route.color as Color,
 		grade: route.grade,
-		...(route.setAt ? { setAt: String(route.setAt) } : {}),
-		...(route.author ? { author: String(route.author) } : {}),
-		...(route.toRemove ? { toRemove: true } : {}),
-		...(route.toOpen ? { toOpen: true } : {}),
-		...(route.deleted ? { deleted: true } : {})
+		setAt: route.setAt || null,
+		author: route.author || null,
+		toRemove: !!route.toRemove,
+		toOpen: !!route.toOpen,
+		deletedAt: route.deletedAt || null
 	};
 };
 

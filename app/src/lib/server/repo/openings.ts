@@ -15,10 +15,10 @@ export const claimRoute = async (
 ): Promise<boolean> => {
 	const result = await db
 		.updateTable('route')
-		.set({ author, updated_at: new Date().toISOString() })
+		.set({ author, updatedAt: new Date().toISOString() })
 		.where('id', '=', routeId)
-		.where('club_id', '=', club.id)
-		.where('deleted_at', 'is', null)
+		.where('clubId', '=', club.id)
+		.where('deletedAt', 'is', null)
 		.where('author', 'is', null)
 		.executeTakeFirst();
 
@@ -32,8 +32,8 @@ export const releaseRoute = async (
 ): Promise<void> => {
 	await db
 		.updateTable('route')
-		.set({ author: null, updated_at: new Date().toISOString() })
+		.set({ author: null, updatedAt: new Date().toISOString() })
 		.where('id', '=', routeId)
-		.where('club_id', '=', club.id)
+		.where('clubId', '=', club.id)
 		.execute();
 };

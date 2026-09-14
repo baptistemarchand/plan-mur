@@ -18,27 +18,28 @@ type ClubTable = {
 	id: Generated<number>;
 	slug: string;
 	name: string;
-	line_count: Generated<number>;
-	max_lines: Generated<number>;
-	password_hash: string;
+	lineCount: Generated<number>;
+	maxLines: Generated<number>;
+	passwordHash: string;
 	revision: Generated<number>;
-	created_at: string;
-	deleted_at: string | null;
+	createdAt: string;
+	deletedAt: string | null;
 };
 
 type RouteTable = {
 	id: string;
-	club_id: number;
-	line_index: number;
+	clubId: number;
+	lineIndex: number;
 	position: number;
 	color: Color;
 	grade: string;
-	set_at: string | null;
+	setAt: string | null;
 	author: string | null;
-	to_remove: Generated<number>;
-	to_open: Generated<number>;
-	deleted_at: string | null;
-	updated_at: string;
+	// SQLite n'a pas de booléen : 0 ou 1.
+	toRemove: Generated<number>;
+	toOpen: Generated<number>;
+	deletedAt: string | null;
+	updatedAt: string;
 };
 
 export type ClubRow = Selectable<ClubTable>;

@@ -4,7 +4,9 @@ import { EditorState } from './state.svelte';
 
 const club: Club = { id: 1, slug: 'picetcol', name: 'Pic et col', lineCount: 2, maxLines: 4 };
 
-const lines = (): Route[][] => [[{ id: 'a', color: 'bleu', grade: '6a' }], []];
+const base = { setAt: null, author: null, toRemove: false, toOpen: false, deletedAt: null };
+
+const lines = (): Route[][] => [[{ id: 'a', color: 'bleu', grade: '6a', ...base }], []];
 
 let fetchMock: ReturnType<typeof vi.fn>;
 
@@ -99,16 +101,25 @@ describe('mutations', () => {
 		expect(state.currentRoute).toMatchObject({ grade: '4a', color: 'blanc' });
 	});
 
-	it('ne crée pas de voie avec les champs morts setAtMonth et setAtYear', () => {
+	it('crée une voie complète, sans champ mort hérité de Fresh', () => {
 		const state = new EditorState(club, lines(), 0);
 		state.addRoute();
-		expect(Object.keys(state.currentRoute!).sort()).toEqual(['color', 'grade', 'id']);
+		expect(state.currentRoute).toEqual({
+			id: expect.any(String),
+			grade: '4a',
+			color: 'blanc',
+			setAt: null,
+			author: null,
+			toRemove: false,
+			toOpen: false,
+			deletedAt: null
+		});
 	});
 
 	it('retombe sur une voie vivante après suppression', () => {
 		const state = new EditorState(
 			club,
-			[[{ id: 'a', color: 'bleu', grade: '6a' }, { id: 'b', color: 'rouge', grade: '7a' }]],
+			[[{ id: 'a', color: 'bleu', grade: '6a', ...base }, { id: 'b', color: 'rouge', grade: '7a', ...base }]],
 			0
 		);
 		state.deleteCurrent();
@@ -127,8 +138,8 @@ describe('mutations', () => {
 			club,
 			[
 				[
-					{ id: 'a', color: 'bleu', grade: '6a', author: 'seb' },
-					{ id: 'b', color: 'rouge', grade: '7a', author: 'lea & max' }
+					{ id: 'a', color: 'bleu', grade: '6a', ...base, author: 'seb' },
+					{ id: 'b', color: 'rouge', grade: '7a', ...base, author: 'lea & max' }
 				]
 			],
 			0

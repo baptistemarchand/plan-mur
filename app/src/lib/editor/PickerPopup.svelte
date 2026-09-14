@@ -9,7 +9,7 @@
 		onclose
 	}: {
 		values: string[];
-		current: string | undefined;
+		current: string | null;
 		placeholder: string;
 		onpick: (value: string) => void;
 		onclose: () => void;

@@ -13,7 +13,10 @@ const routes = (count: number): Route[] =>
 		color: 'bleu',
 		grade: '6a',
 		setAt: '2025 oct',
-		author: 'seb'
+		author: 'seb',
+		toRemove: false,
+		toOpen: false,
+		deletedAt: null
 	}));
 
 const pageCount = async (count: number) => {
@@ -37,7 +40,7 @@ describe('createLabelsPdf', () => {
 
 	it('accepte une voie sans session ni ouvreur', async () => {
 		const bytes = await createLabelsPdf(
-			[{ id: 'a', color: 'noir', grade: '7a' }],
+			[{ id: 'a', color: 'noir', grade: '7a', setAt: null, author: null, toRemove: false, toOpen: false, deletedAt: null }],
 			fontBytes as ArrayBuffer
 		);
 		expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);
@@ -47,7 +50,7 @@ describe('createLabelsPdf', () => {
 	// en caractères manquants.
 	it('embarque les accents des ouvreurs', async () => {
 		const bytes = await createLabelsPdf(
-			[{ id: 'a', color: 'rouge', grade: '6b', setAt: 'fév 2026', author: 'anaïs' }],
+			[{ id: 'a', color: 'rouge', grade: '6b', setAt: 'fév 2026', author: 'anaïs', toRemove: false, toOpen: false, deletedAt: null }],
 			fontBytes as ArrayBuffer
 		);
 		expect(bytes.byteLength).toBeGreaterThan(0);

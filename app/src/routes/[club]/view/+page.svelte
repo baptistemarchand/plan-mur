@@ -21,7 +21,7 @@
 	// barrées. `live` est le sous-ensemble réellement au mur aujourd'hui.
 	const lines = $derived(openedLines(data.lines));
 	const routes = $derived(withLineIndex(lines));
-	const live = $derived(routes.filter((route) => !route.deleted));
+	const live = $derived(routes.filter((route) => !route.deletedAt));
 	const planned = $derived(plannedRoutes(data.lines));
 	const suggestions = $derived(getSuggestions(lines));
 </script>
@@ -31,7 +31,7 @@
 		<div>
 			<div class="text-center text-xl mb-2">{i + 1}</div>
 			<div class="border border-black">
-				{#each line.filter((route) => !route.deleted) as route (route.id)}
+				{#each line.filter((route) => !route.deletedAt) as route (route.id)}
 					<div class="w-24 h-28"><RouteCard {route} variant="small" /></div>
 				{/each}
 			</div>
@@ -75,7 +75,7 @@
 		<Breakdown
 			label="À démonter"
 			showTotal
-			routes={routes.filter((route) => !route.deleted && route.toRemove)}
+			routes={routes.filter((route) => !route.deletedAt && route.toRemove)}
 			getBuckets={(route) => [lineLabel(route)]}
 			sortBy={byLine}
 		/>

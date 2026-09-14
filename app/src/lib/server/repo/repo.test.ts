@@ -21,6 +21,11 @@ let club: Club;
 const route = (over: Partial<Route> & { id: string }): Route => ({
 	color: 'bleu',
 	grade: '6a',
+	setAt: null,
+	author: null,
+	toRemove: false,
+	toOpen: false,
+	deletedAt: null,
 	...over
 });
 
@@ -41,11 +46,11 @@ beforeEach(async () => {
 		.values({
 			slug: 'picetcol',
 			name: 'Pic et col',
-			line_count: 3,
-			max_lines: 24,
-			password_hash: 'x',
-			created_at: new Date().toISOString(),
-			deleted_at: null
+			lineCount: 3,
+			maxLines: 24,
+			passwordHash: 'x',
+			createdAt: new Date().toISOString(),
+			deletedAt: null
 		})
 		.execute();
 
@@ -64,7 +69,7 @@ describe('clubs', () => {
 	it('trie les clubs par nom', async () => {
 		await db
 			.insertInto('club')
-			.values({ slug: 'a', name: 'Alpha', password_hash: 'x', created_at: '2020', deleted_at: null })
+			.values({ slug: 'a', name: 'Alpha', passwordHash: 'x', createdAt: '2020', deletedAt: null })
 			.execute();
 		expect((await listClubs(db)).map((c) => c.slug)).toEqual(['a', 'picetcol']);
 	});
@@ -88,10 +93,19 @@ describe('getWall', () => {
 		expect(wall.lines.map((line) => line.map((r) => r.id))).toEqual([['a', 'b'], [], ['c']]);
 	});
 
-	it('ne rend que les champs optionnels réellement posés', async () => {
+	it('rend une voie dans la forme exacte du domaine', async () => {
 		await saveWall(db, atomic, club, [[route({ id: 'a', setAt: '2025 oct', toRemove: true })]], 0);
 		const [[saved]] = (await getWall(db, club)).lines;
-		expect(saved).toEqual({ id: 'a', color: 'bleu', grade: '6a', setAt: '2025 oct', toRemove: true });
+		expect(saved).toEqual({
+			id: 'a',
+			color: 'bleu',
+			grade: '6a',
+			setAt: '2025 oct',
+			author: null,
+			toRemove: true,
+			toOpen: false,
+			deletedAt: null
+		});
 	});
 });
 
@@ -131,13 +145,13 @@ describe('saveWall', () => {
 		await saveWall(db, atomic, club, [[route({ id: 'a' }), route({ id: 'b' })]], 0);
 		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 1);
 		const routes = (await getWall(db, club)).lines.flat();
-		expect(routes.find((r) => r.id === 'b')?.deleted).toBe(true);
+		expect(routes.find((r) => r.id === 'b')?.deletedAt).toEqual(expect.any(String));
 	});
 
 	it('marque supprimée toute voie quand le mur est vidé', async () => {
 		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 0);
 		await saveWall(db, atomic, club, [[]], 1);
-		expect((await getWall(db, club)).lines.flat()[0].deleted).toBe(true);
+		expect((await getWall(db, club)).lines.flat()[0].deletedAt).toEqual(expect.any(String));
 	});
 });
 
@@ -146,52 +160,39 @@ describe('saveWall', () => {
 describe('suppression logique', () => {
 	const deletionDate = async (id: string) =>
 		(
-			await db.selectFrom('route').select('deleted_at').where('id', '=', id).executeTakeFirst()
-		)?.deleted_at;
+			await db.selectFrom('route').select('deletedAt').where('id', '=', id).executeTakeFirst()
+		)?.deletedAt;
 
-	it('date la suppression au moment où elle a lieu', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 0);
-		expect(await deletionDate('a')).toBeNull();
+	const DELETED_ON = '2024-03-02T10:00:00.000Z';
 
-		await saveWall(db, atomic, club, [[route({ id: 'a', deleted: true })]], 1);
-		expect(await deletionDate('a')).toEqual(expect.any(String));
+	it('écrit la date reçue, sans la réinterpréter', async () => {
+		await saveWall(db, atomic, club, [[route({ id: 'a', deletedAt: DELETED_ON })]], 0);
+		expect(await deletionDate('a')).toBe(DELETED_ON);
 	});
 
-	// L'éditeur renvoie le mur entier à chaque sauvegarde : sans précaution, la
-	// date d'une voie supprimée il y a deux ans serait remise à l'heure.
-	it("garde la date d'origine à travers les sauvegardes suivantes", async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a', deleted: true })]], 0);
-		const first = await deletionDate('a');
+	// L'éditeur renvoie le mur entier à chaque sauvegarde : la date fait
+	// l'aller-retour, elle n'est donc jamais remise à l'heure en chemin.
+	it('laisse la date intacte au fil des sauvegardes', async () => {
+		await saveWall(db, atomic, club, [[route({ id: 'a', deletedAt: DELETED_ON })]], 0);
+		await saveWall(db, atomic, club, [[route({ id: 'a', deletedAt: DELETED_ON })]], 1);
+		expect(await deletionDate('a')).toBe(DELETED_ON);
+	});
 
-		await saveWall(db, atomic, club, [[route({ id: 'a', deleted: true })]], 1);
-		expect(await deletionDate('a')).toBe(first);
+	it("garde l'époque Unix des voies reprises de Deno KV", async () => {
+		await saveWall(db, atomic, club, [[route({ id: 'a', deletedAt: UNKNOWN_DELETION_DATE })]], 0);
+		expect(await deletionDate('a')).toBe(UNKNOWN_DELETION_DATE);
 	});
 
 	it('efface la date si la voie revient au mur', async () => {
-		await saveWall(db, atomic, club, [[route({ id: 'a', deleted: true })]], 0);
+		await saveWall(db, atomic, club, [[route({ id: 'a', deletedAt: DELETED_ON })]], 0);
 		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 1);
 		expect(await deletionDate('a')).toBeNull();
 	});
 
-	it('conserve la date des voies importées sans la réécrire', async () => {
-		await db
-			.insertInto('route')
-			.values({
-				id: 'old',
-				club_id: club.id,
-				line_index: 0,
-				position: 0,
-				color: 'bleu',
-				grade: '6a',
-				set_at: null,
-				author: null,
-				deleted_at: UNKNOWN_DELETION_DATE,
-				updated_at: '2020'
-			})
-			.execute();
-
-		await saveWall(db, atomic, club, [[route({ id: 'old', deleted: true })]], 0);
-		expect(await deletionDate('old')).toBe(UNKNOWN_DELETION_DATE);
+	it('date les voies disparues du payload au moment de la sauvegarde', async () => {
+		await saveWall(db, atomic, club, [[route({ id: 'a' }), route({ id: 'b' })]], 0);
+		await saveWall(db, atomic, club, [[route({ id: 'a' })]], 1);
+		expect(await deletionDate('b')).toEqual(expect.any(String));
 	});
 });
 
@@ -199,7 +200,7 @@ describe('clubs supprimés', () => {
 	beforeEach(async () => {
 		await db
 			.updateTable('club')
-			.set({ deleted_at: new Date().toISOString() })
+			.set({ deletedAt: new Date().toISOString() })
 			.where('id', '=', club.id)
 			.execute();
 	});

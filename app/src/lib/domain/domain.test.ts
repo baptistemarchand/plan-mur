@@ -8,6 +8,11 @@ const route = (over: Partial<Route> = {}): Route => ({
 	id: 'a',
 	color: 'bleu',
 	grade: '6a',
+	setAt: null,
+	author: null,
+	toRemove: false,
+	toOpen: false,
+	deletedAt: null,
 	...over
 });
 
@@ -83,7 +88,7 @@ describe('bucketize', () => {
 describe('openedLines et plannedRoutes', () => {
 	const lines = [
 		[route({ id: '1' }), route({ id: '2', toOpen: true })],
-		[route({ id: '3', toOpen: true, deleted: true })]
+		[route({ id: '3', toOpen: true, deletedAt: '2020-01-01T00:00:00.000Z' })]
 	];
 
 	it('retire les voies planifiées du plan du mur', () => {
@@ -93,7 +98,7 @@ describe('openedLines et plannedRoutes', () => {
 	// Volontaire : les découpages par session et par ouvreur.euse montrent
 	// l'historique, une voie démontée reste au crédit de qui l'a ouverte.
 	it('garde les voies supprimées, que chaque appelant filtre ou non', () => {
-		const withDeleted = [[route({ id: '1' }), route({ id: '2', deleted: true })]];
+		const withDeleted = [[route({ id: '1' }), route({ id: '2', deletedAt: '2020-01-01T00:00:00.000Z' })]];
 		expect(openedLines(withDeleted).flat().map((r) => r.id)).toEqual(['1', '2']);
 	});
 
@@ -145,7 +150,7 @@ describe('getSuggestions', () => {
 				route({ id: '2', color: 'vert' }),
 				route({ id: '3', color: 'jaune' }),
 				route({ id: '4', color: 'orange' }),
-				route({ id: '5', color: 'gris', deleted: true })
+				route({ id: '5', color: 'gris', deletedAt: '2020-01-01T00:00:00.000Z' })
 			]
 		];
 		expect(getSuggestions(lines).find((s) => s.color === 'bleu')?.lines).toEqual([1]);

@@ -15,7 +15,7 @@
 	// Une voie supprimée n'est plus au mur : lui imprimer une étiquette n'a
 	// pas de sens. La version Fresh ne faisait pas ce tri.
 	const routes = $derived(
-		data.lines.flat().filter((route: Route) => !route.deleted && route.setAt === session)
+		data.lines.flat().filter((route: Route) => !route.deletedAt && route.setAt === session)
 	);
 
 	const build = async () => {

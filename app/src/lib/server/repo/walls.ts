@@ -3,15 +3,16 @@ import type { Club, Route, Wall } from '$lib/domain/types';
 import type { Atomic, AtomicQuery } from '../db/client';
 import type { Database, NewRouteRow, RouteRow } from '../db/schema';
 
-const toRoute = (row: RouteRow): Route => ({
+
+const toRoute = ({ toRemove, toOpen, ...row }: RouteRow): Route => ({
 	id: row.id,
 	color: row.color,
 	grade: row.grade,
-	...(row.set_at ? { setAt: row.set_at } : {}),
-	...(row.author ? { author: row.author } : {}),
-	...(row.to_remove ? { toRemove: true } : {}),
-	...(row.to_open ? { toOpen: true } : {}),
-	...(row.deleted_at ? { deleted: true } : {})
+	setAt: row.setAt,
+	author: row.author,
+	toRemove: !!toRemove,
+	toOpen: !!toOpen,
+	deletedAt: row.deletedAt
 });
 
 const toRow = (
@@ -19,23 +20,15 @@ const toRow = (
 	clubId: number,
 	lineIndex: number,
 	position: number,
-	now: string,
-	previousDeletedAt: string | null
+	now: string
 ): NewRouteRow => ({
-	id: route.id,
-	club_id: clubId,
-	line_index: lineIndex,
+	...route,
+	clubId,
+	lineIndex,
 	position,
-	color: route.color,
-	grade: route.grade,
-	set_at: route.setAt ?? null,
-	author: route.author ?? null,
-	to_remove: route.toRemove ? 1 : 0,
-	to_open: route.toOpen ? 1 : 0,
-	// Une voie déjà supprimée garde sa date d'origine : l'éditeur renvoie le
-	// mur entier à chaque sauvegarde, sans quoi elle serait remise à l'heure.
-	deleted_at: route.deleted ? (previousDeletedAt ?? now) : null,
-	updated_at: now
+	toRemove: route.toRemove ? 1 : 0,
+	toOpen: route.toOpen ? 1 : 0,
+	updatedAt: now
 });
 
 /**
@@ -47,8 +40,8 @@ export const getWall = async (db: Kysely<Database>, club: Club): Promise<Wall> =
 	const rows = await db
 		.selectFrom('route')
 		.selectAll()
-		.where('club_id', '=', club.id)
-		.orderBy('line_index')
+		.where('clubId', '=', club.id)
+		.orderBy('lineIndex')
 		.orderBy('position')
 		.execute();
 
@@ -56,14 +49,14 @@ export const getWall = async (db: Kysely<Database>, club: Club): Promise<Wall> =
 	// deux, et un appelant pourrait travailler sur un instantané périmé.
 	const current = await db
 		.selectFrom('club')
-		.select(['revision', 'line_count'])
+		.select(['revision', 'lineCount'])
 		.where('id', '=', club.id)
 		.executeTakeFirstOrThrow();
 
-	const lineCount = Math.max(current.line_count, ...rows.map((row) => row.line_index + 1), 0);
+	const lineCount = Math.max(current.lineCount, ...rows.map((row) => row.lineIndex + 1), 0);
 	const lines: Route[][] = Array.from({ length: lineCount }, () => []);
 	for (const row of rows) {
-		lines[row.line_index].push(toRoute(row));
+		lines[row.lineIndex].push(toRoute(row));
 	}
 
 	return { lines, revision: current.revision };
@@ -92,7 +85,7 @@ export const saveWall = async (
 ): Promise<number | undefined> => {
 	const bumped = await db
 		.updateTable('club')
-		.set((eb) => ({ revision: eb('revision', '+', 1), line_count: lines.length }))
+		.set((eb) => ({ revision: eb('revision', '+', 1), lineCount: lines.length }))
 		.where('id', '=', club.id)
 		.where('revision', '=', expectedRevision)
 		.executeTakeFirst();
@@ -103,28 +96,24 @@ export const saveWall = async (
 
 	const now = new Date().toISOString();
 
-	// Une seule lecture sert deux besoins : conserver la date de suppression
-	// des voies déjà supprimées, et repérer celles qui ont disparu du payload.
 	// La liste des identifiants ne peut pas partir dans un NOT IN, elle
 	// dépasserait le plafond de paramètres liés de D1. La révision vient d'être
 	// prise, personne d'autre n'écrit entre-temps.
-	const existing = await db
-		.selectFrom('route')
-		.select(['id', 'deleted_at'])
-		.where('club_id', '=', club.id)
-		.execute();
-	const previousDeletion = new Map(existing.map((row) => [row.id, row.deleted_at]));
-
 	const rows = lines.flatMap((line, lineIndex) =>
-		line.map((route, position) =>
-			toRow(route, club.id, lineIndex, position, now, previousDeletion.get(route.id) ?? null)
-		)
+		line.map((route, position) => toRow(route, club.id, lineIndex, position, now))
 	);
-
 	const sent = new Set(rows.map((row) => row.id));
-	const orphans = existing
-		.filter((row) => row.deleted_at === null && !sent.has(row.id))
-		.map((row) => row.id);
+
+	const orphans = (
+		await db
+			.selectFrom('route')
+			.select('id')
+			.where('clubId', '=', club.id)
+			.where('deletedAt', 'is', null)
+			.execute()
+	)
+		.map((row) => row.id)
+		.filter((id) => !sent.has(id));
 
 	await atomic((ex) => {
 		// Une instruction par voie plutôt qu'un upsert multi-lignes : D1 plafonne
@@ -137,16 +126,16 @@ export const saveWall = async (
 				.values(row)
 				.onConflict((oc) =>
 					oc.column('id').doUpdateSet((eb) => ({
-						line_index: eb.ref('excluded.line_index'),
+						lineIndex: eb.ref('excluded.lineIndex'),
 						position: eb.ref('excluded.position'),
 						color: eb.ref('excluded.color'),
 						grade: eb.ref('excluded.grade'),
-						set_at: eb.ref('excluded.set_at'),
+						setAt: eb.ref('excluded.setAt'),
 						author: eb.ref('excluded.author'),
-						to_remove: eb.ref('excluded.to_remove'),
-						to_open: eb.ref('excluded.to_open'),
-						deleted_at: eb.ref('excluded.deleted_at'),
-						updated_at: eb.ref('excluded.updated_at')
+						toRemove: eb.ref('excluded.toRemove'),
+						toOpen: eb.ref('excluded.toOpen'),
+						deletedAt: eb.ref('excluded.deletedAt'),
+						updatedAt: eb.ref('excluded.updatedAt')
 					}))
 				)
 		);
@@ -157,7 +146,7 @@ export const saveWall = async (
 			queries.push(
 				ex
 					.updateTable('route')
-					.set({ deleted_at: now, updated_at: now })
+					.set({ deletedAt: now, updatedAt: now })
 					.where('id', '=', id)
 			);
 		}
@@ -172,13 +161,13 @@ export const saveWall = async (
 export const listSessions = async (db: Kysely<Database>, club: Club): Promise<string[]> => {
 	const rows = await db
 		.selectFrom('route')
-		.select('set_at')
+		.select('setAt')
 		.distinct()
-		.where('club_id', '=', club.id)
-		.where('set_at', 'is not', null)
+		.where('clubId', '=', club.id)
+		.where('setAt', 'is not', null)
 		.execute();
 
 	return rows
-		.map((row) => row.set_at as string)
+		.map((row) => row.setAt as string)
 		.sort((a, b) => b.localeCompare(a, 'fr', { numeric: true }));
 };
