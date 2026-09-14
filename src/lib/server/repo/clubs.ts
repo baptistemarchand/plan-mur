@@ -19,3 +19,13 @@ export const getClubBySlug = async (db: Kysely<Database>, slug: string): Promise
     .executeTakeFirst()
   return row && toClub(row)
 }
+
+export const getPasswordHash = async (db: Kysely<Database>, club: Club): Promise<string | undefined> => {
+  const row = await db
+    .selectFrom('club')
+    .select('passwordHash')
+    .where('id', '=', club.id)
+    .where('deletedAt', 'is', null)
+    .executeTakeFirst()
+  return row?.passwordHash
+}

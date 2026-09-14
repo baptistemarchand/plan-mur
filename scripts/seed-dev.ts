@@ -9,8 +9,15 @@
 import {mkdirSync, writeFileSync} from 'node:fs'
 import {dirname} from 'node:path'
 import {colors, type Color} from '../src/lib/domain/colors.ts'
+import {hashPassword} from '../src/lib/server/auth.ts'
 
 const CLUB = {id: 1, slug: 'demo', name: 'Mur de démonstration', maxLines: 16}
+
+/** Mot de passe du club de démonstration, annoncé tel quel dans le README. */
+const PASSWORD = 'demo'
+
+/** Sel figé : un sel tiré au hasard ferait différer deux générations. */
+const PASSWORD_SALT = new TextEncoder().encode('seed-dev-demo-16')
 const LINES = 16
 
 /** L'éditeur plafonne une ligne à 5 voies posées (MAX_ROUTES_PER_LINE). */
@@ -212,7 +219,7 @@ const statements = [
   `DELETE FROM club WHERE id = ${CLUB.id};`,
   `INSERT INTO club (id, slug, name, maxLines, passwordHash, createdAt, deletedAt)\n` +
     `VALUES (${CLUB.id}, ${quote(CLUB.slug)}, ${quote(CLUB.name)}, ${CLUB.maxLines}, ` +
-    `${quote('!')}, ${quote(NOW)}, NULL);`,
+    `${quote(await hashPassword(PASSWORD, PASSWORD_SALT))}, ${quote(NOW)}, NULL);`,
   ...routes.map(
     route =>
       `INSERT INTO route (id, clubId, lineIndex, position, color, grade, setAt, author, toRemove, toOpen, deletedAt, updatedAt)\n` +
@@ -226,6 +233,7 @@ const output = process.argv[2] ?? 'seeds/dev.sql'
 const header = [
   `-- Généré par scripts/seed-dev.ts. Données inventées, aucun prénom réel.`,
   `-- Club « ${CLUB.name} » (/${CLUB.slug}), ${routes.length} voies.`,
+  `-- Mot de passe d'édition : ${PASSWORD}`,
   '',
 ].join('\n')
 
