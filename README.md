@@ -22,21 +22,6 @@ npm run db:seed                  # remplit la bdd avec des datas de test
 npm run dev                      # ou cf:dev pour workerd + D1
 ```
 
-## Édition
-
-La consultation est publique. `/[club]/edit` demande le mot de passe partagé du
-club, qui ouvre aussi les écritures de l'éditeur. Le seed de test répond à `demo`.
-
-Définir le mot de passe d'un club :
-
-```
-node scripts/set-password.ts <slug> <mot-de-passe>
-npx wrangler d1 execute plan-mur --remote --file=seeds/password-<slug>.sql
-```
-
-Tant que ce script n'a pas tourné, `passwordHash` vaut `'!'`, qu'aucun hachage ne
-peut produire : l'édition du club reste fermée.
-
 ## Déployer sur Cloudflare
 
 Un push sur main deploie le code.
