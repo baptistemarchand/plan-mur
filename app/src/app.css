@@ -1,15 +1,11 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-/* L'app s'affiche sur fond clair quel que soit le thème du navigateur : les
-   couleurs des voies sont choisies pour être lues sur blanc. */
 html {
 	color-scheme: light;
 	background-color: #fff;
 	color: #000;
 }
 
-/* Couleurs des prises du mur. Reprises telles quelles de twind.config.ts :
-   ce sont les teintes reconnues par les grimpeurs, pas une palette de design. */
 @theme {
 	--color-bleu: #194bfe;
 	--color-rouge: #ee1616;

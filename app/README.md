@@ -19,10 +19,15 @@ npm run db:migrate                   # applique migrations/*.sql sur local.db
 npm run build:node && DATABASE_PATH=local.db node build/index.js
 ```
 
-`npm run dev` lance Vite seul, pratique pour l'UI mais sans workerd : **faire
-tourner `cf:dev` avant tout déploiement**. Les deux bugs les plus coûteux de la
-mise sur Cloudflare (plafond de paramètres liés de D1, module natif empaqueté)
-étaient invisibles autrement.
+`npm run dev` lance Vite, qui tourne sur Node mais **lit le binding D1 local**,
+pas `local.db` : l'adapter Cloudflare expose `platform.env` dès le serveur de
+développement. Autrement dit `local.db` ne sert qu'à la cible self-host, une
+fois construite.
+
+Vite ne fait pas tourner workerd pour autant : **`cf:dev` avant tout
+déploiement**. Les deux bugs les plus coûteux de la mise sur Cloudflare
+(plafond de paramètres liés de D1, module natif empaqueté) étaient invisibles
+autrement.
 
 ```
 npm test

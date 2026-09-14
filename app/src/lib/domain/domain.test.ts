@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getAuthors, plannedRoutes, visibleLines, withLineIndex } from './routes';
+import { getAuthors, openedLines, plannedRoutes, withLineIndex } from './routes';
 import { bucketize, byCountDesc, gradeBucket, sessionSortKey, UNKNOWN_SESSION } from './stats';
 import { getSuggestions } from './suggestions';
 import type { Route } from './types';
@@ -80,14 +80,21 @@ describe('bucketize', () => {
 	});
 });
 
-describe('visibleLines et plannedRoutes', () => {
+describe('openedLines et plannedRoutes', () => {
 	const lines = [
 		[route({ id: '1' }), route({ id: '2', toOpen: true })],
 		[route({ id: '3', toOpen: true, deleted: true })]
 	];
 
 	it('retire les voies planifiées du plan du mur', () => {
-		expect(visibleLines(lines).flat().map((r) => r.id)).toEqual(['1']);
+		expect(openedLines(lines).flat().map((r) => r.id)).toEqual(['1']);
+	});
+
+	// Volontaire : les découpages par session et par ouvreur.euse montrent
+	// l'historique, une voie démontée reste au crédit de qui l'a ouverte.
+	it('garde les voies supprimées, que chaque appelant filtre ou non', () => {
+		const withDeleted = [[route({ id: '1' }), route({ id: '2', deleted: true })]];
+		expect(openedLines(withDeleted).flat().map((r) => r.id)).toEqual(['1', '2']);
 	});
 
 	it('ne planifie pas les voies supprimées', () => {

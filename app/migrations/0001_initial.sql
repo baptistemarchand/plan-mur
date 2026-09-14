@@ -27,8 +27,6 @@ CREATE TABLE route (
   author     TEXT,
   to_remove  INTEGER NOT NULL DEFAULT 0,
   to_open    INTEGER NOT NULL DEFAULT 0,
-  -- Suppression logique : nul tant que la voie est au mur. L'époque Unix pour
-  -- les voies importées, dont Deno KV ne gardait pas la date de suppression.
   deleted_at TEXT,
   updated_at TEXT    NOT NULL
 );

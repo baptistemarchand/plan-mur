@@ -2,7 +2,7 @@
 	import Breakdown from '$lib/components/Breakdown.svelte';
 	import RouteCard from '$lib/components/RouteCard.svelte';
 	import { getBg, getTextColor } from '$lib/domain/colors';
-	import { plannedRoutes, visibleLines, withLineIndex, getAuthors } from '$lib/domain/routes';
+	import { getAuthors, openedLines, plannedRoutes, withLineIndex } from '$lib/domain/routes';
 	import {
 		byCountDesc,
 		byLine,
@@ -16,8 +16,10 @@
 	let { data } = $props();
 
 	const club = $derived(data.club);
-	// Le plan du mur ignore les voies planifiées : elles ne sont pas encore posées.
-	const lines = $derived(visibleLines(data.lines));
+	// Les voies planifiées ne sont pas encore posées. Les supprimées, elles,
+	// restent ici : les découpages par session et par ouvreur.euse les montrent,
+	// barrées. `live` est le sous-ensemble réellement au mur aujourd'hui.
+	const lines = $derived(openedLines(data.lines));
 	const routes = $derived(withLineIndex(lines));
 	const live = $derived(routes.filter((route) => !route.deleted));
 	const planned = $derived(plannedRoutes(data.lines));

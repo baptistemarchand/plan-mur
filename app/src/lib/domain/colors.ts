@@ -23,8 +23,6 @@ const DARK: readonly Color[] = ['noir', 'bleu', 'violet', 'rouge', 'vert'];
 export const isLight = (color: Color) => LIGHT.includes(color);
 export const isDark = (color: Color) => DARK.includes(color);
 
-// Classes littérales obligatoires : Tailwind scanne le source, une classe
-// construite par template string ne serait jamais générée.
 const BG: Record<Color, string> = {
 	blanc: 'bg-white',
 	gris: 'bg-gris',
@@ -53,8 +51,7 @@ export const getStripesColor = (color: Color) => {
 	return `rgba(0, 0, 0, ${isDark(color) ? '0.5' : '0.2'})`;
 };
 
-// Teintes d'impression des étiquettes. Elles diffèrent volontairement des
-// couleurs écran : reprises telles quelles de la version Fresh.
+// Teintes d'impression des étiquettes. Elles diffèrent volontairement des couleurs écran
 export const PRINT_RGB: Record<Color, [number, number, number]> = {
 	blanc: [255, 255, 255],
 	gris: [149, 149, 149],
