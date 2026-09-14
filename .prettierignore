@@ -1,0 +1,14 @@
+node_modules
+.svelte-kit
+.wrangler
+package-lock.json
+
+# Généré par `wrangler types` : le reformater serait défait au prochain appel.
+src/worker-configuration.d.ts
+
+# Données réelles, hors du dépôt.
+export
+seeds
+
+# Dossier Deno, formaté par deno fmt et voué à disparaître à la bascule.
+migration
