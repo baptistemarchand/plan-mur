@@ -12,10 +12,7 @@
 		{
 			"binding": "DB",
 			"database_name": "plan-mur",
-			// À remplacer par l'identifiant rendu par `wrangler d1 create plan-mur`.
-			// Wrangler y écrit un identifiant local tant que la base distante
-			// n'existe pas : ce diff local est attendu.
-			"database_id": "REMPLACER_APRES_WRANGLER_D1_CREATE",
+			"database_id": "9550379d-af95-4fe6-81fc-e5ef3a265d53",
 			"migrations_dir": "migrations"
 		}
 	]

@@ -97,15 +97,17 @@ routes d'édition sont ouvertes, comme dans la version Fresh. La colonne
 
 ## Déployer sur Cloudflare
 
-Le dépôt est prêt, mais la base n'existe pas encore. À faire une fois :
+La base D1 existe et son identifiant est dans `wrangler.jsonc`. Reste :
 
 ```
 wrangler login
-wrangler d1 create plan-mur          # reporter l'id dans wrangler.jsonc
 npm run cf:migrate -- --remote
 wrangler d1 execute plan-mur --remote --file=seeds/import.sql
 wrangler deploy
 ```
+
+Le seed vient de `npm run db:import` sur un export KV frais, cf. plus bas. Les
+mots de passe de club y valent `'!'` : l'édition est à ouvrir séparément.
 
 Le script Worker pèse environ 180 Ko une fois compressé, police et bundle
 client exclus puisqu'ils partent en assets. Vérifier la limite en vigueur sur
