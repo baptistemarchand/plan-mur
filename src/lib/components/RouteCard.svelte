@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {getBorderColor, getInkHex, getStripesColor, getSwatch} from '$lib/domain/colors'
+  import {getBorderColor, getInkHex, getStripesColor, getColorClasses} from '$lib/domain/colors'
   import {getAuthors} from '$lib/domain/routes'
   import type {Route} from '$lib/domain/types'
   import Icon from './Icon.svelte'
@@ -14,7 +14,9 @@
 </script>
 
 <div
-  class="p-2 h-full {getSwatch(route.color)} {selected ? `border-dashed ${getBorderColor(route.color)} border-4` : ''}"
+  class="p-2 h-full {getColorClasses(route.color)} {selected
+    ? `border-dashed ${getBorderColor(route.color)} border-4`
+    : ''}"
   style={route.toRemove
     ? `background-image: repeating-linear-gradient(45deg, ${stripes}, ${stripes} 10px, rgba(0,0,0,0) 10px, rgba(0,0,0,0) 25px);`
     : ''}

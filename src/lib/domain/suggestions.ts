@@ -2,7 +2,7 @@ import {colors, type Color} from './colors'
 import {isLive} from './routes'
 import type {Route} from './types'
 
-/** Une ligne accueille 5 voies, comme dans l'éditeur. */
+// Make that a param of club
 export const MAX_ROUTES_PER_LINE = 5
 
 export type Suggestion = {color: Color; lines: number[]}

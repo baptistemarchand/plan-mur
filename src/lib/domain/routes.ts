@@ -1,12 +1,7 @@
 import type {Route} from './types'
 
-/** Une voie encore au mur. La suppression est logique, jamais une ligne retirée. */
 export const isLive = (route: Route): boolean => !route.deletedAt
 
-/**
- * Une voie peut être ouverte à plusieurs. La saisie est libre et les deux
- * séparateurs se sont installés à l'usage, "&" l'emportant sur "+".
- */
 export const getAuthors = (route: Route): string[] => {
   if (!route.author) {
     return []

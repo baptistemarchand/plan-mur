@@ -42,5 +42,3 @@ export const sessionSortKey = (label: string): number =>
 export const byLine = (bucket: Bucket<RouteWithLineIndex>): number => bucket.items[0].lineIndex
 
 export const byCountDesc = <T>(bucket: Bucket<T>): number => -bucket.items.length
-
-export const lineLabel = (route: RouteWithLineIndex): string => `ligne ${route.lineIndex + 1}`

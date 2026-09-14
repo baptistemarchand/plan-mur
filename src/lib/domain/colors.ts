@@ -40,7 +40,7 @@ const getBg = (color: Color) => BG[color]
 
 const getTextColor = (color: Color) => (isDark(color) ? 'text-white' : 'text-black')
 
-export const getSwatch = (color: Color) => `${getBg(color)} ${getTextColor(color)}`
+export const getColorClasses = (color: Color) => `${getBg(color)} ${getTextColor(color)}`
 
 export const getInkHex = (color: Color) => (isDark(color) ? '#fff' : '#000')
 

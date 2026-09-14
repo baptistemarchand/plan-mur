@@ -2,11 +2,20 @@
   import Breakdown from '$lib/components/Breakdown.svelte'
   import RouteCard from '$lib/components/RouteCard.svelte'
   import ColorChip from '$lib/components/ColorChip.svelte'
-  import {getAuthors, isLive, openedLines, plannedRoutes, withLineIndex} from '$lib/domain/routes'
-  import {byCountDesc, byLine, gradeBucket, lineLabel, sessionSortKey, UNKNOWN_SESSION} from '$lib/domain/stats'
+  import {
+    getAuthors,
+    isLive,
+    openedLines,
+    plannedRoutes,
+    withLineIndex,
+    type RouteWithLineIndex,
+  } from '$lib/domain/routes'
+  import {byCountDesc, byLine, gradeBucket, sessionSortKey, UNKNOWN_SESSION} from '$lib/domain/stats'
   import {getSuggestions, MAX_ROUTES_PER_LINE} from '$lib/domain/suggestions'
 
   let {data} = $props()
+
+  const lineLabel = (route: RouteWithLineIndex): string => `ligne ${route.lineIndex + 1}`
 
   const club = $derived(data.club)
   // Les voies planifiées ne sont pas encore posées. Les supprimées, elles,

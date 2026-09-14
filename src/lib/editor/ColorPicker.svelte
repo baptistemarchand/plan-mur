@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {colors, getSwatch} from '$lib/domain/colors'
+  import {colors, getColorClasses} from '$lib/domain/colors'
   import {getEditorState} from './state.svelte'
 
   const state = getEditorState()
@@ -10,7 +10,7 @@
     {#each colors as color (color)}
       <button
         type="button"
-        class="flex items-center justify-center {getSwatch(color)}"
+        class="flex items-center justify-center {getColorClasses(color)}"
         onclick={() => state.updateCurrent(() => ({color}))}
       >
         {color}
