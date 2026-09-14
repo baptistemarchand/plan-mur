@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run check
+      - run: npm test
+
+      - name: Build et empaquetage Worker
+        run: npx wrangler deploy --dry-run --outdir=/tmp/worker
+
+      - name: Smoke test sous workerd
+        run: |
+          npx wrangler d1 migrations apply plan-mur
+          npx wrangler dev --port 3099 &
+          for i in $(seq 1 30); do
+            curl -sf -o /dev/null http://localhost:3099/ && break
+            sleep 2
+          done
+          curl -sf -o /dev/null http://localhost:3099/ || { echo "le Worker ne répond pas"; exit 1; }

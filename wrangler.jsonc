@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "plan-mur",
+  "build": {"command": "npm run build"},
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".svelte-kit/cloudflare",
+  },
+  "observability": {"enabled": true},
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "plan-mur",
+      "database_id": "9550379d-af95-4fe6-81fc-e5ef3a265d53",
+      "migrations_dir": "migrations",
+    },
+  ],
+}
