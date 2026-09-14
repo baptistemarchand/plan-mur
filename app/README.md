@@ -1,9 +1,5 @@
 # plan-mur
 
-Réécriture de l'app Fresh/Deno KV restée à la racine du dépôt. Les deux
-coexistent jusqu'à la bascule : l'ancienne reste en production et sert de
-plan de retour arrière.
-
 ## Lancer
 
 ```
