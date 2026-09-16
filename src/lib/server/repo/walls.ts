@@ -96,9 +96,13 @@ export const EMPTY_WALL_SUMMARY: WallSummary = {colors: [], sessions: 0, authors
 
 /**
  * Aperçu de tous les murs pour la page d'accueil, en deux requêtes agrégées.
- * Tout est cadré sur le mur d'aujourd'hui : voies réellement posées, ni
- * planifiées ni supprimées. Les ouvreur.euses sont comptés tels qu'ils sont
- * saisis, sans découper les binômes ("Nina & Lou" compte pour un).
+ * Deux périmètres volontairement différents, comme sur la page du mur :
+ * les couleurs décrivent le mur d'aujourd'hui (voies posées et non supprimées),
+ * tandis que les sessions et les ouvreur.euses couvrent tout l'historique —
+ * une session dont les voies ont toutes été démontées a bien eu lieu.
+ * Les voies planifiées, elles, ne comptent nulle part.
+ * Les ouvreur.euses sont comptés tels qu'ils sont saisis, sans découper les
+ * binômes ("Nina & Lou" compte pour un).
  */
 export const getWallSummaries = async (db: Kysely<Database>): Promise<Record<number, WallSummary>> => {
   const [colorRows, countRows] = await Promise.all([
@@ -117,7 +121,6 @@ export const getWallSummaries = async (db: Kysely<Database>): Promise<Record<num
         eb.fn.count<number>('setAt').distinct().as('sessions'),
         eb.fn.count<number>('author').distinct().as('authors'),
       ])
-      .where('deletedAt', 'is', null)
       .where('toOpen', '=', 0)
       .groupBy('clubId')
       .execute(),
