@@ -1,4 +1,5 @@
 import type {Kysely} from 'kysely'
+import type {Color} from '$lib/domain/colors'
 import type {Club, Route} from '$lib/domain/types'
 import type {Database, NewRouteRow, RouteRow} from '../db/schema'
 
@@ -85,4 +86,57 @@ export const listSessions = async (db: Kysely<Database>, club: Club): Promise<st
     .execute()
 
   return rows.map(row => row.setAt as string).sort((a, b) => b.localeCompare(a, 'fr', {numeric: true}))
+}
+
+export type ColorCount = {color: Color; count: number}
+
+export type WallSummary = {colors: ColorCount[]; sessions: number; authors: number}
+
+export const EMPTY_WALL_SUMMARY: WallSummary = {colors: [], sessions: 0, authors: 0}
+
+/**
+ * Aperçu de tous les murs pour la page d'accueil, en deux requêtes agrégées.
+ * Tout est cadré sur le mur d'aujourd'hui : voies réellement posées, ni
+ * planifiées ni supprimées. Les ouvreur.euses sont comptés tels qu'ils sont
+ * saisis, sans découper les binômes ("Nina & Lou" compte pour un).
+ */
+export const getWallSummaries = async (db: Kysely<Database>): Promise<Record<number, WallSummary>> => {
+  const [colorRows, countRows] = await Promise.all([
+    db
+      .selectFrom('route')
+      .select(['clubId', 'color'])
+      .select(eb => eb.fn.countAll<number>().as('count'))
+      .where('deletedAt', 'is', null)
+      .where('toOpen', '=', 0)
+      .groupBy(['clubId', 'color'])
+      .execute(),
+    db
+      .selectFrom('route')
+      .select('clubId')
+      .select(eb => [
+        eb.fn.count<number>('setAt').distinct().as('sessions'),
+        eb.fn.count<number>('author').distinct().as('authors'),
+      ])
+      .where('deletedAt', 'is', null)
+      .where('toOpen', '=', 0)
+      .groupBy('clubId')
+      .execute(),
+  ])
+
+  const summaries: Record<number, WallSummary> = {}
+  const summaryOf = (clubId: number) => (summaries[clubId] ??= {colors: [], sessions: 0, authors: 0})
+
+  for (const row of colorRows) {
+    summaryOf(row.clubId).colors.push({color: row.color, count: Number(row.count)})
+  }
+  for (const row of countRows) {
+    const summary = summaryOf(row.clubId)
+    summary.sessions = Number(row.sessions)
+    summary.authors = Number(row.authors)
+  }
+  for (const {colors} of Object.values(summaries)) {
+    colors.sort((a, b) => b.count - a.count)
+  }
+
+  return summaries
 }
