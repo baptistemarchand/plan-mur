@@ -1,14 +1,14 @@
 import {fail, redirect} from '@sveltejs/kit'
-import {plannedRoutes} from '$lib/domain/routes'
 import {claimRoute, releaseRoute} from '$lib/server/repo/openings'
 import {getWall} from '$lib/server/repo/walls'
 import type {Actions, PageServerLoad} from './$types'
 
 const MAX_NAME_LENGTH = 40
 
+// Le mur entier, pas seulement les voies à ouvrir : la page montre aussi ce
+// qu'il y a à démonter et les possibilités d'ouverture.
 export const load: PageServerLoad = async ({locals}) => {
-  const lines = await getWall(locals.db, locals.club!)
-  return {planned: plannedRoutes(lines)}
+  return {lines: await getWall(locals.db, locals.club!)}
 }
 
 export const actions: Actions = {

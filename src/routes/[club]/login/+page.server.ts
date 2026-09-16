@@ -46,6 +46,6 @@ export const actions: Actions = {
 
   logout: async ({cookies, locals, params}) => {
     endSession(cookies, locals.club!)
-    redirect(303, `/${params.club}/view`)
+    redirect(303, `/${params.club}`)
   },
 }

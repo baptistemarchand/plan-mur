@@ -41,6 +41,6 @@
       </form>
     {/if}
 
-    <a href="/{data.club.slug}/view" class="inline-block mt-8 underline">Retour au plan du mur</a>
+    <a href="/{data.club.slug}" class="inline-block mt-8 underline">Retour au plan du mur</a>
   </div>
 </div>

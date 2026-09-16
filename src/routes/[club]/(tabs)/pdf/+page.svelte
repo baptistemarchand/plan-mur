@@ -42,17 +42,17 @@
   }
 </script>
 
-<div class="max-w-2xl mx-auto p-4">
+<div class="max-w-2xl p-4">
   <div class="text-2xl font-semibold">Étiquettes à imprimer</div>
 
   {#if data.sessions.length === 0}
-    <div class="text-gray-600 mt-4">
+    <div class="text-gray-600 mt-1">
       Aucune session d'ouverture enregistrée pour ce club : il n'y a rien à imprimer.
     </div>
   {:else}
     <div class="text-gray-600 mt-1">Neuf étiquettes par page A4, à découper.</div>
 
-    <label class="flex items-center gap-2 mt-6">
+    <label class="flex items-center gap-2 mt-4">
       <span class="font-semibold whitespace-nowrap">Session</span>
       <select
         value={session}
@@ -82,6 +82,4 @@
       <ErrorBox>Échec de la génération : {failure}</ErrorBox>
     {/if}
   {/if}
-
-  <a href="/{data.club.slug}/view" class="inline-block mt-8 underline">Retour au plan du mur</a>
 </div>

@@ -4,14 +4,14 @@
   import TinyRouteCard from './TinyRouteCard.svelte'
 
   let {
-    label,
+    label = '',
     routes,
     getBuckets,
     sortBy,
     showTotal = false,
     showTaken = false,
   }: {
-    label: string
+    label?: string
     routes: RouteWithLineIndex[]
     getBuckets: (route: RouteWithLineIndex) => string[]
     sortBy?: (bucket: Bucket<RouteWithLineIndex>) => string | number
@@ -22,10 +22,14 @@
   const buckets = $derived(bucketize(routes, {getBuckets, sortBy}))
 </script>
 
-<div class="ml-3 mt-4">
-  <div class="text-xl font-semibold">
-    {label}{showTotal ? ` (${routes.length})` : ''}
-  </div>
+<!-- Les marges sont à la page : elle seule sait si ce découpage est une
+     colonne, une section, ou le corps entier. -->
+<div>
+  {#if label}
+    <div class="text-2xl font-semibold">
+      {label}{showTotal ? ` (${routes.length})` : ''}
+    </div>
+  {/if}
   {#each buckets as bucket (bucket.label)}
     <div class="flex py-1">
       <div class="mr-3">{bucket.label}</div>

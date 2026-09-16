@@ -39,7 +39,7 @@
           {@const routeCount = countRoutes(club.colors)}
           <li>
             <a
-              href="/{club.slug}/view"
+              href="/{club.slug}"
               class="group block h-full rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/10 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-black/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
             >
               <div class="flex items-baseline justify-between gap-3">
