@@ -21,7 +21,5 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Dumps Deno KV bruts et SQL d'import qui en dérive : régénérés à la demande,
-# et ils contiennent les prénoms des ouvreurs.
-export/
+# SQL généré par scripts/
 seeds/

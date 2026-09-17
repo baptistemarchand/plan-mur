@@ -1,5 +1,6 @@
 <script lang="ts">
   import {getColorClasses, type Color} from '$lib/domain/colors'
+  import {SOURCE_URL} from '$lib/domain/source'
 
   let {data} = $props()
 
@@ -68,4 +69,9 @@
       </ul>
     {/if}
   </main>
+
+  <footer class="mx-auto max-w-3xl px-6 pb-10 text-center text-sm text-stone-400">
+    <a class="underline underline-offset-2 hover:text-stone-600" href={SOURCE_URL}>Code source</a>
+    &middot; AGPL-3.0
+  </footer>
 </div>

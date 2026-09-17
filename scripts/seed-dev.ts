@@ -1,11 +1,10 @@
 // Jeu de données de développement : un club et son mur, générés de toutes
-// pièces. Le dump Deno KV, lui, n'est pas versionné et porte les prénoms des
-// ouvreurs : sans lui une base fraîche est vide, et rien ne s'affiche.
+// pièces. Sans lui une base fraîche est vide et rien ne s'affiche.
 // Les proportions (couleurs, cotations, sessions, co-ouvertures) reprennent
 // celles de la prod ; les prénoms sont inventés.
 //
-// Comme import-kv.ts, on écrit un .sql plutôt que d'attaquer la base : il se
-// relit avant exécution, et wrangler reste seul à écrire.
+// On écrit un .sql plutôt que d'attaquer la base : il se relit avant
+// exécution, et wrangler reste seul à écrire.
 import {mkdirSync, writeFileSync} from 'node:fs'
 import {dirname} from 'node:path'
 import {colors, type Color} from '../src/lib/domain/colors.ts'

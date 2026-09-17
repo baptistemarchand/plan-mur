@@ -1,5 +1,6 @@
 <script lang="ts">
   import {page} from '$app/state'
+  import {SOURCE_URL} from '$lib/domain/source'
 
   let {data, children} = $props()
 
@@ -36,3 +37,8 @@
 </div>
 
 {@render children()}
+
+<footer class="px-2 py-4 text-center text-sm text-stone-400">
+  <a class="underline underline-offset-2 hover:text-stone-600" href={SOURCE_URL}>Code source</a>
+  &middot; AGPL-3.0
+</footer>
