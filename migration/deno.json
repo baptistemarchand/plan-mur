@@ -1,6 +1,0 @@
-{
-  "tasks": {
-    "export-kv": "deno run -A export-kv.ts"
-  },
-  "unstable": ["kv"]
-}
