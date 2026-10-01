@@ -77,7 +77,7 @@
   </div>
 {/if}
 
-<div class="bg-white text-black min-h-screen">
+<div class="bg-white text-black">
   <div class="p-4 flex flex-col md:flex-row md:items-start gap-x-12 gap-y-8">
     <div class="w-full max-w-2xl">
       <div class="text-2xl font-semibold">À ouvrir</div>
