@@ -1,6 +1,5 @@
 <script lang="ts">
   import {getBorderColor, getInkHex, getStripesColor, getColorClasses} from '$lib/domain/colors'
-  import {getAuthors} from '$lib/domain/routes'
   import type {Route} from '$lib/domain/types'
   import Icon from './Icon.svelte'
 
@@ -10,7 +9,6 @@
   const gradeSize = $derived(big ? 'text-5xl' : 'text-2xl')
   const textSize = $derived(big ? 'text-xl font-semibold' : '')
   const stripes = $derived(getStripesColor(route.color))
-  const authors = $derived(getAuthors(route))
 </script>
 
 <div
@@ -28,7 +26,7 @@
     {/if}
   </div>
   <div class={textSize}>{route.setAt}</div>
-  {#each authors as author, i (i)}
-    <div class={textSize}>{author}</div>
-  {/each}
+  {#if route.author}
+    <div class={textSize}>{route.author}</div>
+  {/if}
 </div>

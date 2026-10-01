@@ -3,8 +3,6 @@ import {claimRoute, releaseRoute} from '$lib/server/repo/openings'
 import {getWall} from '$lib/server/repo/walls'
 import type {Actions, PageServerLoad} from './$types'
 
-const MAX_NAME_LENGTH = 40
-
 // Le mur entier, pas seulement les voies à ouvrir : la page montre aussi ce
 // qu'il y a à démonter et les possibilités d'ouverture.
 export const load: PageServerLoad = async ({locals}) => {
@@ -15,12 +13,10 @@ export const actions: Actions = {
   take: async ({locals, params, request}) => {
     const form = await request.formData()
     const routeId = String(form.get('route') ?? '')
-    const name = String(form.get('name') ?? '')
-      .trim()
-      .slice(0, MAX_NAME_LENGTH)
+    const name = String(form.get('name') ?? '').trim()
 
     if (!name) {
-      return fail(400, {message: 'Il manque ton prénom.'})
+      return fail(400, {message: 'Il manque un prénom.'})
     }
 
     const taken = await claimRoute(locals.db, locals.club!, routeId, name)

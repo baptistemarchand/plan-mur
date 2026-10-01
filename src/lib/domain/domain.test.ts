@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {getAuthors, openedLines, plannedRoutes, withLineIndex} from './routes'
+import {openedLines, plannedRoutes, withLineIndex} from './routes'
 import {bucketize, byCountDesc, gradeBucket, sessionSortKey} from './stats'
 import {getSuggestions} from './suggestions'
 import type {Route} from './types'
@@ -14,28 +14,6 @@ const route = (over: Partial<Route> = {}): Route => ({
   toOpen: false,
   deletedAt: null,
   ...over,
-})
-
-describe('getAuthors', () => {
-  it('rend une liste vide sans ouvreur', () => {
-    expect(getAuthors(route())).toEqual([])
-  })
-
-  it('rend un seul ouvreur tel quel', () => {
-    expect(getAuthors(route({author: 'seb'}))).toEqual(['seb'])
-  })
-
-  it('découpe sur &', () => {
-    expect(getAuthors(route({author: 'seb & lea'}))).toEqual(['seb ', ' lea'])
-  })
-
-  it('découpe sur + à défaut de &', () => {
-    expect(getAuthors(route({author: 'seb + lea'}))).toEqual(['seb ', ' lea'])
-  })
-
-  it('privilégie & quand les deux séparateurs sont présents', () => {
-    expect(getAuthors(route({author: 'seb & lea + max'}))).toEqual(['seb ', ' lea + max'])
-  })
 })
 
 describe('gradeBucket', () => {
@@ -73,11 +51,11 @@ describe('bucketize', () => {
     ])
   })
 
-  it('range une voie dans plusieurs seaux quand elle a plusieurs ouvreurs', () => {
-    const buckets = bucketize([route({author: 'seb & lea'})], {
-      getBuckets: r => getAuthors(r).map(a => a.trim()),
+  it('range une voie dans plusieurs seaux quand getBuckets en rend plusieurs', () => {
+    const buckets = bucketize([route({color: 'bleu', grade: '6a'})], {
+      getBuckets: r => [r.color, r.grade],
     })
-    expect(buckets.map(b => b.label)).toEqual(['lea', 'seb'])
+    expect(buckets.map(b => b.label)).toEqual(['6a', 'bleu'])
   })
 })
 

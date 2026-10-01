@@ -173,13 +173,13 @@ describe('mutations', () => {
     expect(state.currentRoute).toBeUndefined()
   })
 
-  it("n'ouvre pas les saisies collectives comme ouvreurs proposables", () => {
+  it('propose les saisies collectives comme une entrée à part entière', () => {
     const state = new EditorState(club, [
       [
         {id: 'a', color: 'bleu', grade: '6a', ...base, author: 'seb'},
         {id: 'b', color: 'rouge', grade: '7a', ...base, author: 'lea & max'},
       ],
     ])
-    expect(state.allAuthors).toEqual(['seb'])
+    expect(state.allAuthors).toEqual(['lea & max', 'seb'])
   })
 })

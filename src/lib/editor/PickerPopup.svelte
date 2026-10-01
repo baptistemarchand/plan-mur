@@ -35,7 +35,7 @@
       {placeholder}
       bind:value={draft}
     />
-    <div class="mx-auto flex gap-4 bg-white">
+    <div class="mx-auto flex gap-4">
       <button
         type="button"
         class="text-2xl bg-green-500 w-32 mx-auto mt-4 text-white rounded py-2 px-4"
