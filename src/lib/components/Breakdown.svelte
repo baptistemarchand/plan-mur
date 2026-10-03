@@ -30,15 +30,22 @@
       {label}{showTotal ? ` (${routes.length})` : ''}
     </div>
   {/if}
-  {#each buckets as bucket (bucket.label)}
-    <div class="flex py-1">
-      <div class="mr-3">{bucket.label}</div>
-      {#each bucket.items as route}
-        <TinyRouteCard {route} {showTaken} />
-      {/each}
-      {#if bucket.items.length > 1}
-        <div class="ml-2">({bucket.items.length})</div>
-      {/if}
-    </div>
-  {/each}
+  <!-- Les libellés partagent une colonne, taillée sur le plus long : les
+       pastilles démarrent toutes au même endroit. -->
+  <div class="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-2 gap-y-2 py-1">
+    {#each buckets as bucket (bucket.label)}
+      <div>{bucket.label}</div>
+      <div class="flex">
+        <!-- Une ligne trop longue passe à la ligne plutôt que d'écraser ses pastilles. -->
+        <div class="flex flex-wrap gap-y-1">
+          {#each bucket.items as route}
+            <TinyRouteCard {route} {showTaken} />
+          {/each}
+        </div>
+        {#if bucket.items.length > 1}
+          <div class="ml-2 shrink-0">({bucket.items.length})</div>
+        {/if}
+      </div>
+    {/each}
+  </div>
 </div>
