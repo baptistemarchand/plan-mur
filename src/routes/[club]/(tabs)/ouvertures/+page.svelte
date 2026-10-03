@@ -43,13 +43,27 @@
 <svelte:window onkeydown={event => event.key === 'Escape' && (assigning = null)} />
 
 {#if assigning}
+  <button
+    type="button"
+    aria-label="Annuler l'attribution"
+    class="fixed inset-0 z-10 hidden md:block bg-black/30 cursor-default"
+    onclick={() => (assigning = null)}
+  ></button>
   <div
-    class="fixed inset-0 z-10 flex flex-col bg-white text-black md:left-auto md:w-[28rem] md:border-l md:border-black"
+    class="fixed inset-0 z-20 flex flex-col bg-white text-black md:left-auto md:w-[28rem] md:border-l md:border-black"
   >
     <div class="shrink-0 flex items-center gap-3 border-b border-black p-3">
       <div>ligne {assigning.lineIndex + 1}</div>
       <ColorChip color={assigning.color} classes="w-24 text-center" />
       <div class="text-xl font-semibold">{assigning.grade}</div>
+      <button
+        type="button"
+        aria-label="Annuler l'attribution"
+        class="ml-auto border-2 border-black rounded w-10 h-10 text-xl hover:bg-gray-200"
+        onclick={() => (assigning = null)}
+      >
+        ✕
+      </button>
     </div>
     <div class="relative grow">
       <PickerPopup
@@ -97,15 +111,16 @@
                     type="submit"
                     name="route"
                     value={route.id}
-                    title="Annuler cette inscription"
-                    class="border border-green-600 bg-green-100 text-green-900 rounded px-3 py-2"
+                    title="Annuler l'inscription de {route.author}"
+                    class="inline-flex w-40 items-center justify-center gap-2 border border-green-600 bg-green-100 text-green-900 rounded px-3 py-2"
                   >
-                    {route.author} ✕
+                    <span class="truncate">{route.author}</span>
+                    <span>✕</span>
                   </button>
                 {:else}
                   <button
                     type="button"
-                    class="border-2 border-black rounded px-3 py-2 hover:bg-gray-200"
+                    class="w-40 border-2 border-black rounded px-3 py-2 hover:bg-gray-200"
                     onclick={() => (assigning = route)}
                   >
                     Attribuer
@@ -118,8 +133,6 @@
       {/if}
     </div>
 
-    <!-- « À démonter » est étroit et tient sur son contenu ; les deux autres
-         colonnes se partagent ce qui reste. -->
     <div class="shrink-0">
       <Breakdown
         label="À démonter"
