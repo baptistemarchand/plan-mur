@@ -98,10 +98,10 @@ export const EMPTY_WALL_SUMMARY: WallSummary = {colors: [], sessions: 0, authors
  * Aperçu de tous les murs pour la page d'accueil, en deux requêtes agrégées.
  * Deux périmètres volontairement différents, comme sur la page du mur :
  * les couleurs décrivent le mur d'aujourd'hui (voies posées et non supprimées),
- * tandis que les sessions et les ouvreur.euses couvrent tout l'historique —
+ * tandis que les sessions et les ouvreur·euses couvrent tout l'historique —
  * une session dont les voies ont toutes été démontées a bien eu lieu.
  * Les voies planifiées, elles, ne comptent nulle part.
- * Les ouvreur.euses sont comptés tels qu'ils sont saisis, sans découper les
+ * Les ouvreur·euses sont comptés tels qu'ils sont saisis, sans découper les
  * binômes ("Nina & Lou" compte pour un).
  */
 export const getWallSummaries = async (db: Kysely<Database>): Promise<Record<number, WallSummary>> => {

@@ -193,7 +193,7 @@ for (let lineIndex = 0; lineIndex < LINES; lineIndex++) {
   let position = 0
 
   // L'historique : des voies démontées les sessions précédentes. Elles ne
-  // s'affichent que dans les découpages par session et par ouvreur.euse.
+  // s'affichent que dans les découpages par session et par ouvreur·euse.
   const removed = Math.floor(random() * 3)
   for (let i = 0; i < removed; i++) {
     addRoute(lineIndex, position++, {deletedAt: '2025-10-04T17:30:00.000Z'})

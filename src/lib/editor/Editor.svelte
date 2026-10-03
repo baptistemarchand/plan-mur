@@ -70,7 +70,7 @@
           </ActionButton>
 
           <ActionButton
-            label="Ouvreur.euse"
+            label="Ouvreur·euse"
             classes="bg-blue-500 text-white"
             onclick={() => (state.authorPopup = true)}
           >

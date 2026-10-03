@@ -95,7 +95,7 @@ describe('openedLines et plannedRoutes', () => {
     ).toEqual(['1'])
   })
 
-  // Volontaire : les découpages par session et par ouvreur.euse montrent
+  // Volontaire : les découpages par session et par ouvreur·euse montrent
   // l'historique, une voie démontée reste au crédit de qui l'a ouverte.
   it('garde les voies supprimées, que chaque appelant filtre ou non', () => {
     const withDeleted = [[route({id: '1'}), route({id: '2', deletedAt: '2020-01-01T00:00:00.000Z'})]]
