@@ -1,20 +1,23 @@
 <script lang="ts">
   import ErrorBox from '$lib/components/ErrorBox.svelte'
-  import {isLive} from '$lib/domain/routes'
-  import type {Route} from '$lib/domain/types'
+  import {isLive, withLineIndex} from '$lib/domain/routes'
+
+  const ALL = ''
 
   let {data} = $props()
 
   // La session retenue est dérivée, pas copiée : changer de club sans
   // remonter la page ne doit pas garder une session qui n'existe plus.
-  let chosen = $state('')
-  const session = $derived(data.sessions.includes(chosen) ? chosen : (data.sessions[0] ?? ''))
+  // Sans choix valide, on retombe sur l'export de toutes les voies au mur.
+  let chosen = $state(ALL)
+  const session = $derived(data.sessions.includes(chosen) ? chosen : ALL)
   let building = $state(false)
   let failure = $state('')
 
   // Une voie supprimée n'est plus au mur : lui imprimer une étiquette n'a
   // pas de sens. La version Fresh ne faisait pas ce tri.
-  const routes = $derived(data.lines.flat().filter((route: Route) => isLive(route) && route.setAt === session))
+  const live = $derived(withLineIndex(data.lines).filter(isLive))
+  const routes = $derived(session === ALL ? live : live.filter(route => route.setAt === session))
 
   const build = async () => {
     building = true
@@ -31,7 +34,8 @@
       const url = URL.createObjectURL(new Blob([bytes], {type: 'application/pdf'}))
       const link = document.createElement('a')
       link.href = url
-      link.download = `etiquettes-${data.club.slug}-${session.replace(/\s+/g, '-')}.pdf`
+      const suffix = session === ALL ? 'toutes-voies' : session.replace(/\s+/g, '-')
+      link.download = `etiquettes-${data.club.slug}-${suffix}.pdf`
       link.click()
       URL.revokeObjectURL(url)
     } catch (error) {
@@ -45,10 +49,8 @@
 <div class="max-w-2xl p-4">
   <div class="text-2xl font-semibold">Étiquettes à imprimer</div>
 
-  {#if data.sessions.length === 0}
-    <div class="text-gray-600 mt-1">
-      Aucune session d'ouverture enregistrée pour ce club : il n'y a rien à imprimer.
-    </div>
+  {#if live.length === 0 && data.sessions.length === 0}
+    <div class="text-gray-600 mt-1">Aucune voie au mur pour ce club : il n'y a rien à imprimer.</div>
   {:else}
     <div class="text-gray-600 mt-1">Neuf étiquettes par page A4, à découper.</div>
 
@@ -59,6 +61,7 @@
         onchange={event => (chosen = event.currentTarget.value)}
         class="border-2 border-black rounded px-2 py-1 flex-1"
       >
+        <option value={ALL}>Toutes voies actuelles</option>
         {#each data.sessions as value (value)}
           <option {value}>{value}</option>
         {/each}
@@ -66,7 +69,8 @@
     </label>
 
     <div class="mt-4">
-      {routes.length} voie{routes.length > 1 ? 's' : ''} dans cette session.
+      {routes.length} voie{routes.length > 1 ? 's' : ''}
+      {session === ALL ? 'actuellement au mur' : 'dans cette session'}.
     </div>
 
     <button

@@ -1,13 +1,13 @@
 import {readFileSync} from 'node:fs'
 import {PDFDocument} from 'pdf-lib'
 import {describe, expect, it} from 'vitest'
-import type {Route} from '$lib/domain/types'
+import type {RouteWithLineIndex} from '$lib/domain/routes'
 import {createLabelsPdf} from './labels'
 
 const font = readFileSync('static/garamond.ttf')
 const fontBytes = font.buffer.slice(font.byteOffset, font.byteOffset + font.byteLength)
 
-const routes = (count: number): Route[] =>
+const routes = (count: number): RouteWithLineIndex[] =>
   Array.from({length: count}, (_, i) => ({
     id: String(i),
     color: 'bleu',
@@ -17,6 +17,7 @@ const routes = (count: number): Route[] =>
     toRemove: false,
     toOpen: false,
     deletedAt: null,
+    lineIndex: i,
   }))
 
 const pageCount = async (count: number) => {
@@ -44,6 +45,7 @@ describe('createLabelsPdf', () => {
           toRemove: false,
           toOpen: false,
           deletedAt: null,
+          lineIndex: 0,
         },
       ],
       fontBytes as ArrayBuffer,

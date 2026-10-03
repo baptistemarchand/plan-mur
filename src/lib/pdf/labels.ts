@@ -1,6 +1,7 @@
 import {PageSizes, PDFDocument, rgb, StandardFonts, type RGB} from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import {isDark, PRINT_RGB} from '$lib/domain/colors'
+import type {RouteWithLineIndex} from '$lib/domain/routes'
 import type {Route} from '$lib/domain/types'
 
 // Étiquettes A4, 9 par page, à découper et coller au mur.
@@ -16,13 +17,15 @@ const printColor = (route: Route): RGB => {
 
 const printTextColor = (route: Route): RGB => (isDark(route.color) ? rgb(1, 1, 1) : rgb(0, 0, 0))
 
-export const createLabelsPdf = async (routes: Route[], fontBytes: ArrayBuffer): Promise<ArrayBuffer> => {
+export const createLabelsPdf = async (routes: RouteWithLineIndex[], fontBytes: ArrayBuffer): Promise<ArrayBuffer> => {
   const pdf = await PDFDocument.create()
   pdf.registerFontkit(fontkit)
 
   const helveticaBold = await pdf.embedFont(StandardFonts.HelveticaBold)
+  const helvetica = await pdf.embedFont(StandardFonts.Helvetica)
   const garamond = await pdf.embedFont(fontBytes)
   const black = rgb(0, 0, 0)
+  const gray = rgb(0.45, 0.45, 0.45)
 
   for (let offset = 0; offset < routes.length; offset += PER_PAGE) {
     const chunk = routes.slice(offset, offset + PER_PAGE)
@@ -30,8 +33,6 @@ export const createLabelsPdf = async (routes: Route[], fontBytes: ArrayBuffer): 
 
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
-        // Remplissage par colonne, comme dans la version Fresh : l'ordre
-        // des étiquettes sur la feuille doit rester le même.
         const route = chunk[col * 3 + row]
         if (!route) {
           continue
@@ -96,6 +97,15 @@ export const createLabelsPdf = async (routes: Route[], fontBytes: ArrayBuffer): 
             color: black,
           })
         }
+
+        const line = `L${route.lineIndex + 1}`
+        page.drawText(line, {
+          x: x + WIDTH - helvetica.widthOfTextAtSize(line, 10) - 8,
+          y: y + 8,
+          size: 10,
+          font: helvetica,
+          color: gray,
+        })
       }
     }
   }
