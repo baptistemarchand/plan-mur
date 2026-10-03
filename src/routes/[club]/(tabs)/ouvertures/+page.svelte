@@ -20,8 +20,6 @@
 
   const lineLabel = (route: RouteWithLineIndex): string => `ligne ${route.lineIndex + 1}`
 
-  // « À démonter » ne parle que des voies réellement au mur : les planifiées
-  // n'y sont pas encore, les supprimées n'y sont plus.
   const lines = $derived(openedLines(data.lines))
   const live = $derived(withLineIndex(lines).filter(isLive))
   const planned = $derived(plannedRoutes(data.lines))
@@ -30,14 +28,12 @@
   const free = $derived(planned.filter(route => !route.author).length)
   const authors = $derived(distinctValues(data.lines, route => route.author))
 
-  // La voie en cours d'attribution : c'est elle qui ouvre le panneau.
   let assigning = $state<RouteWithLineIndex | null>(null)
   let picked = $state('')
   let takeForm = $state<HTMLFormElement>()
 
   const assign = async (name: string) => {
     picked = name
-    // Les champs cachés doivent porter le nom avant l'envoi.
     await tick()
     takeForm?.requestSubmit()
     assigning = null
@@ -47,7 +43,6 @@
 <svelte:window onkeydown={event => event.key === 'Escape' && (assigning = null)} />
 
 {#if assigning}
-  <!-- Plein écran sur téléphone, panneau à droite à partir de md. -->
   <div
     class="fixed inset-0 z-10 flex flex-col bg-white text-black md:left-auto md:w-[28rem] md:border-l md:border-black"
   >

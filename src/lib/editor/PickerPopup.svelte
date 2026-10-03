@@ -21,9 +21,13 @@
 </script>
 
 <div class="h-full absolute w-full">
-  <div class="grid bg-black grid-rows-5 grid-flow-col gap-px h-4/5 w-full">
+  <div class="grid bg-black grid-rows-5 grid-flow-col auto-cols-fr gap-px h-4/5 w-full">
     {#each values as value (value)}
-      <ToggleButton selected={current === value} onclick={() => onpick(value)}>
+      <ToggleButton
+        selected={current === value}
+        classes="min-w-0 px-1 text-center wrap-anywhere"
+        onclick={() => onpick(value)}
+      >
         {value}
       </ToggleButton>
     {/each}

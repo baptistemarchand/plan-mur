@@ -2,10 +2,6 @@ import type {Route} from './types'
 
 export const isLive = (route: Route): boolean => !route.deletedAt
 
-/**
- * Valeurs déjà saisies sur le mur, sans doublon et triées. Pour les ouvreurs,
- * une entrée = un ouvreur même en cas d' "ouvreurs composés".
- */
 export const distinctValues = (lines: Route[][], read: (route: Route) => string | null): string[] => {
   const values = lines
     .flat()
