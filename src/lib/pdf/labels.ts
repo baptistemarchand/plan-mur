@@ -33,8 +33,6 @@ export const createLabelsPdf = async (routes: RouteWithLineIndex[], fontBytes: A
 
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
-        // Remplissage par colonne, comme dans la version Fresh : l'ordre
-        // des étiquettes sur la feuille doit rester le même.
         const route = chunk[col * 3 + row]
         if (!route) {
           continue
@@ -100,8 +98,6 @@ export const createLabelsPdf = async (routes: RouteWithLineIndex[], fontBytes: A
           })
         }
 
-        // Numéro de ligne, discret dans le coin : il sert à retrouver où
-        // coller l'étiquette, pas à être lu depuis le pied du mur.
         const line = `L${route.lineIndex + 1}`
         page.drawText(line, {
           x: x + WIDTH - helvetica.widthOfTextAtSize(line, 10) - 8,
