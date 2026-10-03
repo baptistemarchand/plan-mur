@@ -53,7 +53,7 @@
                   Mur vide
                 {:else}
                   {plural(routeCount, 'voie')} · {plural(club.sessions, 'session')} ·
-                  {plural(club.authors, 'ouvreur.euse')}
+                  {plural(club.authors, 'ouvreur·euse')}
                 {/if}
               </div>
 

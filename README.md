@@ -7,7 +7,7 @@ Gestionnaire de mur d'escalade simple, destiné aux clubs et associations.
 <img width="390" height="768" alt="image" src="https://github.com/user-attachments/assets/e76674a7-5a2f-48cd-b0f0-d3315248d250" />
 
 Chaque club a son mur, découpé en lignes, et chaque ligne porte ses voies :
-couleur, cotation, session d'ouverture, ouvreur.euse. L'application sert à
+couleur, cotation, session d'ouverture, ouvreur·euse. L'application sert à
 tenir cet inventaire à jour, à préparer les prochaines sessions (voies à
 démonter, voies à ouvrir), à en tirer des statistiques et à imprimer les
 étiquettes à coller au pied du mur.
