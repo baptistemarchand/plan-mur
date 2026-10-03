@@ -4,14 +4,12 @@
 
   let {data} = $props()
 
-  // Les voies planifiées ne sont pas encore posées : elles n'ont pas de place
-  // au mur.
   const lines = $derived(openedLines(data.lines))
 </script>
 
-<div class="flex space-x-1 ml-1">
+<div class="flex space-x-1 px-1 pb-3 overflow-x-auto">
   {#each lines as line, i (i)}
-    <div>
+    <div class="shrink-0">
       <div class="text-center text-xl mb-2">{i + 1}</div>
       <div class="border border-black">
         {#each line.filter(isLive) as route (route.id)}
