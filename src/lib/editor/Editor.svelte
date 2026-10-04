@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from '$lib/components/Icon.svelte'
+  import Tabs from '$lib/components/Tabs.svelte'
   import type {Club, Route} from '$lib/domain/types'
   import ActionButton from './ActionButton.svelte'
   import ColorPicker from './ColorPicker.svelte'
@@ -17,8 +18,6 @@
   // svelte-ignore state_referenced_locally
   const state = new EditorState(club, lines)
   setEditorState(state)
-
-  const indicator = $derived({SAVING: 'bg-yellow-500', SAVED: 'bg-green-400', FAILED: 'bg-red-500'}[state.saveState])
 </script>
 
 <div class="h-[calc(100dvh)] flex flex-col">
@@ -47,7 +46,7 @@
     />
   {/if}
 
-  <div class="{indicator} h-1 shrink-0"></div>
+  <div class="shrink-0"><Tabs {club} /></div>
 
   {#if state.saveState === 'FAILED'}
     <div class="bg-red-500 text-white text-center py-2 text-lg shrink-0">
