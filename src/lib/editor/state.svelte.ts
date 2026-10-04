@@ -1,7 +1,7 @@
 import {getContext, setContext} from 'svelte'
 import {customAlphabet} from 'nanoid'
 import {MAX_ROUTES_PER_LINE} from '$lib/domain/suggestions'
-import {isLive} from '$lib/domain/routes'
+import {distinctValues, isLive} from '$lib/domain/routes'
 import type {Club, Route} from '$lib/domain/types'
 
 // Même alphabet et même longueur que la version Fresh : les identifiants
@@ -42,22 +42,9 @@ export class EditorState {
   }
 
   /** Valeurs déjà saisies, proposées avant la saisie libre. */
-  allSetAts = $derived(this.#distinct(route => route.setAt))
+  allSetAts = $derived(distinctValues(this.lines, route => route.setAt))
 
-  // Les saisies collectives ("a & b") ne sont pas des ouvreurs proposables.
-  allAuthors = $derived(
-    this.#distinct(route => route.author).filter(
-      author => !author.includes('+') && !author.includes('/') && !author.includes('&'),
-    ),
-  )
-
-  #distinct(read: (route: Route) => string | null): string[] {
-    const values = this.lines
-      .flat()
-      .map(read)
-      .filter((value): value is string => !!value)
-    return [...new Set(values)].sort()
-  }
+  allAuthors = $derived(distinctValues(this.lines, route => route.author))
 
   selectLine(index: number) {
     this.selectedLine = index

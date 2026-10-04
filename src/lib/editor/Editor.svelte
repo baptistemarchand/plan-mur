@@ -28,7 +28,7 @@
       current={state.currentRoute.author}
       placeholder="Chris Sharma"
       onpick={author => {
-        state.updateCurrent(() => ({author: author.toLowerCase().trim()}))
+        state.updateCurrent(() => ({author: author.trim()}))
         state.authorPopup = false
       }}
       onclose={() => (state.authorPopup = false)}

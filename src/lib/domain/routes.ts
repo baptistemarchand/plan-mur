@@ -2,17 +2,12 @@ import type {Route} from './types'
 
 export const isLive = (route: Route): boolean => !route.deletedAt
 
-export const getAuthors = (route: Route): string[] => {
-  if (!route.author) {
-    return []
-  }
-  if (route.author.includes('&')) {
-    return route.author.split('&')
-  }
-  if (route.author.includes('+')) {
-    return route.author.split('+')
-  }
-  return [route.author]
+export const distinctValues = (lines: Route[][], read: (route: Route) => string | null): string[] => {
+  const values = lines
+    .flat()
+    .map(read)
+    .filter((value): value is string => !!value)
+  return [...new Set(values)].sort()
 }
 
 export type RouteWithLineIndex = Route & {lineIndex: number}

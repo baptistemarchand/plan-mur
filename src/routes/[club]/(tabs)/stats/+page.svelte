@@ -1,6 +1,6 @@
 <script lang="ts">
   import Breakdown from '$lib/components/Breakdown.svelte'
-  import {getAuthors, isLive, openedLines, withLineIndex} from '$lib/domain/routes'
+  import {isLive, openedLines, withLineIndex} from '$lib/domain/routes'
   import {byCountDesc, gradeBucket, sessionSortKey, UNKNOWN_SESSION} from '$lib/domain/stats'
 
   let {data} = $props()
@@ -15,7 +15,7 @@
   // Une session dont toutes les voies ont été démontées a quand même eu lieu,
   // et son ouvreur·euse a quand même ouvert : les deux comptes partent de
   // `routes`, supprimées comprises.
-  const authors = $derived(new Set(routes.flatMap(route => getAuthors(route).map(author => author.trim()))).size)
+  const authors = $derived(new Set(routes.map(route => route.author).filter(Boolean)).size)
   const sessions = $derived(new Set(routes.map(route => route.setAt).filter(Boolean)).size)
 </script>
 
@@ -38,7 +38,7 @@
     <Breakdown
       label="Par ouvreur·euse"
       routes={routes.filter(route => route.author)}
-      getBuckets={route => getAuthors(route).map(author => author.trim())}
+      getBuckets={route => (route.author ? [route.author] : [])}
       sortBy={byCountDesc}
     />
     <Breakdown
