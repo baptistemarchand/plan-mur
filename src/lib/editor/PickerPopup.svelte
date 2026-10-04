@@ -22,9 +22,7 @@
 
 <div class="h-full absolute w-full flex flex-col">
   <div class="grow min-h-0 overflow-y-auto overscroll-contain bg-white">
-    <div
-      class="grid bg-black grid-cols-3 sm:grid-cols-4 md:grid-cols-5 auto-rows-[4rem] gap-px border-b border-black"
-    >
+    <div class="grid bg-black grid-cols-3 sm:grid-cols-4 md:grid-cols-5 auto-rows-[4rem] gap-px border-b border-black">
       {#each values as value (value)}
         <ToggleButton
           selected={current === value}
