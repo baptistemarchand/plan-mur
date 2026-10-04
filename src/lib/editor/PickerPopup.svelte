@@ -20,19 +20,23 @@
   let draft = $state('')
 </script>
 
-<div class="h-full absolute w-full">
-  <div class="grid bg-black grid-rows-5 grid-flow-col auto-cols-fr gap-px h-4/5 w-full">
-    {#each values as value (value)}
-      <ToggleButton
-        selected={current === value}
-        classes="min-w-0 px-1 text-center wrap-anywhere"
-        onclick={() => onpick(value)}
-      >
-        {value}
-      </ToggleButton>
-    {/each}
+<div class="h-full absolute w-full flex flex-col">
+  <div class="grow min-h-0 overflow-y-auto overscroll-contain bg-white">
+    <div
+      class="grid bg-black grid-cols-3 sm:grid-cols-4 md:grid-cols-5 auto-rows-[minmax(3.5rem,auto)] gap-px border-b border-black"
+    >
+      {#each values as value (value)}
+        <ToggleButton
+          selected={current === value}
+          classes="min-w-0 px-2 py-1 text-center text-lg leading-tight wrap-anywhere"
+          onclick={() => onpick(value)}
+        >
+          {value}
+        </ToggleButton>
+      {/each}
+    </div>
   </div>
-  <div class="bg-white flex flex-col h-2/5 border-t border-black pt-4">
+  <div class="bg-white flex flex-col shrink-0 border-t border-black pb-4">
     <input
       type="text"
       class="border-black rounded border-2 text-center mx-8 mt-4 h-10 text-2xl"
