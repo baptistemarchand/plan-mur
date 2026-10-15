@@ -1,6 +1,5 @@
 import {getContext, setContext} from 'svelte'
 import {customAlphabet} from 'nanoid'
-import {MAX_ROUTES_PER_LINE} from '$lib/domain/suggestions'
 import {distinctValues, isLive} from '$lib/domain/routes'
 import type {Club, Route} from '$lib/domain/types'
 
@@ -35,7 +34,6 @@ export class EditorState {
   currentLine = $derived(this.lines[this.selectedLine] ?? [])
   visibleRoutes = $derived(this.currentLine.filter(isLive))
   currentRoute = $derived(this.currentLine.find(route => route.id === this.selectedRouteId))
-  canAddRoute = $derived(this.visibleRoutes.length < MAX_ROUTES_PER_LINE)
 
   get canAddLine() {
     return this.lines.length < this.club.maxLines
