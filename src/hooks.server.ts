@@ -21,5 +21,12 @@ export const handle: Handle = async ({event, resolve}) => {
     event.locals.club = club
   }
 
-  return resolve(event)
+  const response = await resolve(event)
+
+  // HTML revalidé à chaque visite, sinon une page en cache réclame les scripts d'un build disparu.
+  if (response.headers.get('content-type')?.startsWith('text/html') && !response.headers.has('cache-control')) {
+    response.headers.set('cache-control', 'no-cache')
+  }
+
+  return response
 }
