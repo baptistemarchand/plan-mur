@@ -254,3 +254,26 @@ describe('listSessions', () => {
     expect(await listSessions(db, club)).toEqual(['2025 oct', '2021 oct'])
   })
 })
+
+describe('migration 0004 : majuscule aux noms', () => {
+  it('met une majuscule aux noms existants, accents compris', () => {
+    const sqlite = new SQLite(':memory:')
+    sqlite.exec(migrations[0])
+    sqlite.exec(`INSERT INTO club (id, slug, name, passwordHash, createdAt) VALUES (1, 'c', 'C', 'x', '')`)
+    const insert = sqlite.prepare(
+      `INSERT INTO route (id, clubId, lineIndex, position, color, grade, author, updatedAt) VALUES (?, 1, 0, ?, 'bleu', '6a', ?, '')`,
+    )
+    ;[
+      ['a', 'paul'],
+      ['b', 'Paul'],
+      ['c', 'élodie'],
+      ['d', null],
+      ['e', 'jean-Marc'],
+    ].forEach(([id, author], i) => insert.run(id, i, author))
+
+    sqlite.exec(readFileSync('migrations/0004_capitalize_authors.sql', 'utf8'))
+
+    const authors = sqlite.prepare('SELECT author FROM route ORDER BY position').pluck().all()
+    expect(authors).toEqual(['Paul', 'Paul', 'Élodie', null, 'Jean-Marc'])
+  })
+})

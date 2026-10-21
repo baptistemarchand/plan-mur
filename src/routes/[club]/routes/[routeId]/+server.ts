@@ -1,5 +1,6 @@
 import {error} from '@sveltejs/kit'
 import {colors, type Color} from '$lib/domain/colors'
+import {capitalize} from '$lib/domain/routes'
 import {isAuthenticated} from '$lib/server/session'
 import {saveRoute, type PositionedRoute} from '$lib/server/repo/walls'
 import type {RequestHandler} from './$types'
@@ -22,7 +23,7 @@ const parseRoute = (value: unknown, id: string): PositionedRoute => {
     color: route.color as Color,
     grade: route.grade,
     setAt: route.setAt || null,
-    author: route.author || null,
+    author: (route.author && capitalize(route.author)) || null,
     note: route.note || null,
     toRemove: !!route.toRemove,
     toOpen: !!route.toOpen,

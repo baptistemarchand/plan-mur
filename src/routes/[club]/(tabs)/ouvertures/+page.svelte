@@ -7,6 +7,7 @@
   import {
     isLive,
     openedLines,
+    canonicalName,
     distinctValues,
     plannedRoutes,
     withLineIndex,
@@ -33,7 +34,7 @@
   let confirming = $state<string | null>(null)
 
   const assign = async (name: string) => {
-    picked = name
+    picked = canonicalName(name, authors)
     await tick()
     takeForm?.requestSubmit()
     assigning = null

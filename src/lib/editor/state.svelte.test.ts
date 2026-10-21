@@ -183,4 +183,15 @@ describe('mutations', () => {
     ])
     expect(state.allAuthors).toEqual(['lea & max', 'seb'])
   })
+
+  it('trie les noms sans tenir compte de la casse', () => {
+    const state = new EditorState(club, [
+      [
+        {id: 'a', color: 'bleu', grade: '6a', ...base, author: 'Paul'},
+        {id: 'b', color: 'rouge', grade: '7a', ...base, author: 'lea'},
+        {id: 'c', color: 'vert', grade: '5c', ...base, author: 'Élodie'},
+      ],
+    ])
+    expect(state.allAuthors).toEqual(['Élodie', 'lea', 'Paul'])
+  })
 })
