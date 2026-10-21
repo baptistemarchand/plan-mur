@@ -7,6 +7,7 @@ export type Route = {
   /** Session d'ouverture, libellé libre du club : "2025 oct". */
   setAt: string | null
   author: string | null
+  note: string | null
   toRemove: boolean
   toOpen: boolean
   deletedAt: string | null

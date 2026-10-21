@@ -10,6 +10,7 @@ const route = (over: Partial<Route> = {}): Route => ({
   grade: '6a',
   setAt: null,
   author: null,
+  note: null,
   toRemove: false,
   toOpen: false,
   deletedAt: null,

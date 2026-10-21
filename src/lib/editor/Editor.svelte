@@ -7,6 +7,7 @@
   import GradePicker from './GradePicker.svelte'
   import Line from './Line.svelte'
   import LinePicker from './LinePicker.svelte'
+  import NotePopup from './NotePopup.svelte'
   import PickerPopup from './PickerPopup.svelte'
   import {EditorState, setEditorState} from './state.svelte'
 
@@ -46,6 +47,17 @@
     />
   {/if}
 
+  {#if state.notePopup && state.currentRoute}
+    <NotePopup
+      current={state.currentRoute.note}
+      onsave={note => {
+        state.updateCurrent(() => ({note}))
+        state.notePopup = false
+      }}
+      onclose={() => (state.notePopup = false)}
+    />
+  {/if}
+
   <div class="shrink-0"><Tabs {club} /></div>
 
   {#if state.saveState === 'FAILED'}
@@ -74,6 +86,14 @@
             onclick={() => (state.authorPopup = true)}
           >
             {#snippet icon()}<Icon name="person" color="#fff" size="30px" />{/snippet}
+          </ActionButton>
+
+          <ActionButton
+            label={route.note ? `« ${route.note} »` : 'Note'}
+            classes="border border-black bg-white text-black {route.note ? 'italic font-normal' : ''}"
+            onclick={() => (state.notePopup = true)}
+          >
+            {#snippet icon()}<Icon name="note" color="#000" size="26px" />{/snippet}
           </ActionButton>
 
           <ActionButton

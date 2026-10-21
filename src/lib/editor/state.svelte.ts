@@ -18,6 +18,7 @@ export class EditorState {
   saveState = $state<SaveState>('SAVED')
   authorPopup = $state(false)
   setAtPopup = $state(false)
+  notePopup = $state(false)
 
   readonly club: Club
   // Les écritures s'enchaînent au lieu de partir en parallèle : une rafale
@@ -68,6 +69,7 @@ export class EditorState {
               color: 'blanc' as const,
               setAt: null,
               author: null,
+              note: null,
               toRemove: false,
               toOpen: false,
               deletedAt: null,

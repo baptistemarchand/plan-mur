@@ -24,9 +24,15 @@
     {#if route.toOpen}
       <Icon name="construction" color={getInkHex(route.color)} size={big ? '28px' : '18px'} />
     {/if}
+    {#if !big && route.note}
+      <Icon name="note" color={getInkHex(route.color)} size="14px" />
+    {/if}
   </div>
   <div class={textSize}>{route.setAt}</div>
   {#if route.author}
     <div class={textSize}>{route.author}</div>
+  {/if}
+  {#if big && route.note}
+    <div class="italic truncate">« {route.note} »</div>
   {/if}
 </div>

@@ -26,6 +26,7 @@ type RouteTable = {
   grade: string
   setAt: string | null
   author: string | null
+  note: string | null
   // SQLite n'a pas de booléen : 0 ou 1.
   toRemove: Generated<number>
   toOpen: Generated<number>

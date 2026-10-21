@@ -4,7 +4,7 @@ import {EditorState} from './state.svelte'
 
 const club: Club = {id: 1, slug: 'picetcol', name: 'Pic et col', maxLines: 4}
 
-const base = {setAt: null, author: null, toRemove: false, toOpen: false, deletedAt: null}
+const base = {setAt: null, author: null, note: null, toRemove: false, toOpen: false, deletedAt: null}
 
 const lines = (): Route[][] => [[{id: 'a', color: 'bleu', grade: '6a', ...base}], []]
 
@@ -149,6 +149,7 @@ describe('mutations', () => {
       color: 'blanc',
       setAt: null,
       author: null,
+      note: null,
       toRemove: false,
       toOpen: false,
       deletedAt: null,
