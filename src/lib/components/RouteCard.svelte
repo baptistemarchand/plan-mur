@@ -32,7 +32,4 @@
   {#if route.author}
     <div class={textSize}>{route.author}</div>
   {/if}
-  {#if big && route.note}
-    <div class="italic truncate">« {route.note} »</div>
-  {/if}
 </div>
