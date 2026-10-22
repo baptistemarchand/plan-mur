@@ -1,4 +1,4 @@
-import {readFileSync} from 'node:fs'
+import {readdirSync, readFileSync} from 'node:fs'
 import SQLite from 'better-sqlite3'
 import {Kysely, SqliteDialect} from 'kysely'
 import {beforeEach, describe, expect, it} from 'vitest'
@@ -11,7 +11,11 @@ import {getWall, listSessions, saveRoute, type PositionedRoute} from './walls'
 // Ces tests valident les requêtes sur SQLite, pas les particularités de D1
 // (absence de transaction interactive, exécution en lot). Ce qui passe ici
 // n'est donc pas une garantie sur la cible Cloudflare.
-const migration = readFileSync('migrations/0001_initial.sql', 'utf8')
+// Toutes les migrations, dans l'ordre où D1 les applique.
+const migrations = readdirSync('migrations')
+  .filter(file => file.endsWith('.sql'))
+  .sort()
+  .map(file => readFileSync(`migrations/${file}`, 'utf8'))
 
 let db: Kysely<Database>
 let club: Club
@@ -21,6 +25,7 @@ const route = (over: Partial<PositionedRoute> & {id: string}): PositionedRoute =
   grade: '6a',
   setAt: null,
   author: null,
+  note: null,
   toRemove: false,
   toOpen: false,
   deletedAt: null,
@@ -36,7 +41,7 @@ const ids = (lines: Route[][]) => lines.map(line => line.map(r => r.id))
 beforeEach(async () => {
   const sqlite = new SQLite(':memory:')
   sqlite.pragma('foreign_keys = ON')
-  sqlite.exec(migration)
+  migrations.forEach(migration => sqlite.exec(migration))
   db = new Kysely<Database>({dialect: new SqliteDialect({database: sqlite})})
 
   await db
@@ -120,6 +125,7 @@ describe('getWall', () => {
       grade: '6a',
       setAt: '2025 oct',
       author: null,
+      note: null,
       toRemove: true,
       toOpen: false,
       deletedAt: null,
@@ -161,6 +167,17 @@ describe('saveRoute', () => {
     await put({id: 'a', position: 0, author: 'seb'})
     await put({id: 'b', position: 1})
     expect((await getWall(db, club)).flat()[0].author).toBe('seb')
+  })
+
+  it('enregistre, modifie et retire la note', async () => {
+    await put({id: 'a', note: 'départ assis'})
+    expect((await getWall(db, club)).flat()[0].note).toBe('départ assis')
+
+    await put({id: 'a', note: 'sans dièdre'})
+    expect((await getWall(db, club)).flat()[0].note).toBe('sans dièdre')
+
+    await put({id: 'a', note: null})
+    expect((await getWall(db, club)).flat()[0].note).toBeNull()
   })
 })
 

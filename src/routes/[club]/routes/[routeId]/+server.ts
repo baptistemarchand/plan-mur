@@ -23,6 +23,7 @@ const parseRoute = (value: unknown, id: string): PositionedRoute => {
     grade: route.grade,
     setAt: route.setAt || null,
     author: route.author || null,
+    note: route.note || null,
     toRemove: !!route.toRemove,
     toOpen: !!route.toOpen,
     deletedAt: route.deletedAt || null,

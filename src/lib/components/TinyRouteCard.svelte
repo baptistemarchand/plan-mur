@@ -10,7 +10,7 @@
   class="relative overflow-hidden text-xs border border-black ml-1 w-7 rounded h-7 flex justify-center items-center {getColorClasses(
     route.color,
   )} {isLive(route) ? '' : 'line-through'}"
-  title={route.author}
+  title={[route.author, route.note].filter(Boolean).join(' · ') || undefined}
 >
   {#if showTaken && route.author}
     <div
