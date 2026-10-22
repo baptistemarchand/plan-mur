@@ -1,4 +1,5 @@
 import {fail, redirect} from '@sveltejs/kit'
+import {capitalize} from '$lib/domain/routes'
 import {claimRoute, markRemoved, releaseRoute} from '$lib/server/repo/openings'
 import {getWall} from '$lib/server/repo/walls'
 import type {Actions, PageServerLoad} from './$types'
@@ -13,7 +14,7 @@ export const actions: Actions = {
   take: async ({locals, params, request}) => {
     const form = await request.formData()
     const routeId = String(form.get('route') ?? '')
-    const name = String(form.get('name') ?? '').trim()
+    const name = capitalize(String(form.get('name') ?? ''))
 
     if (!name) {
       return fail(400, {message: 'Il manque un prénom.'})

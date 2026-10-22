@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {openedLines, plannedRoutes, withLineIndex} from './routes'
+import {canonicalName, capitalize, openedLines, plannedRoutes, withLineIndex} from './routes'
 import {bucketize, byCountDesc, gradeBucket, sessionSortKey} from './stats'
 import {getSuggestions} from './suggestions'
 import type {Route} from './types'
@@ -15,6 +15,30 @@ const route = (over: Partial<Route> = {}): Route => ({
   toOpen: false,
   deletedAt: null,
   ...over,
+})
+
+describe('capitalize', () => {
+  it('met une majuscule en tête sans toucher au reste', () => {
+    expect(capitalize('paul')).toBe('Paul')
+    expect(capitalize('élodie')).toBe('Élodie')
+    expect(capitalize('jean-Marc')).toBe('Jean-Marc')
+    expect(capitalize('  lea   &  max ')).toBe('Lea & max')
+  })
+})
+
+describe('canonicalName', () => {
+  it("reprend l'orthographe d'un nom connu à la casse près", () => {
+    expect(canonicalName('PAUL', ['Lea', 'Paul'])).toBe('Paul')
+    expect(canonicalName('paul', ['Lea', 'Paul'])).toBe('Paul')
+  })
+
+  it('ne confond pas deux noms qui ne diffèrent que par un accent', () => {
+    expect(canonicalName('lea', ['Léa'])).toBe('Lea')
+  })
+
+  it('met en forme un nom inconnu', () => {
+    expect(canonicalName('max', ['Paul'])).toBe('Max')
+  })
 })
 
 describe('gradeBucket', () => {

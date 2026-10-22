@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/Icon.svelte'
   import Tabs from '$lib/components/Tabs.svelte'
+  import {canonicalName} from '$lib/domain/routes'
   import type {Club, Route} from '$lib/domain/types'
   import ActionButton from './ActionButton.svelte'
   import ColorPicker from './ColorPicker.svelte'
@@ -28,7 +29,7 @@
       current={state.currentRoute.author}
       placeholder="Chris Sharma"
       onpick={author => {
-        state.updateCurrent(() => ({author: author.trim()}))
+        state.updateCurrent(() => ({author: canonicalName(author, state.allAuthors)}))
         state.authorPopup = false
       }}
       onclose={() => (state.authorPopup = false)}
