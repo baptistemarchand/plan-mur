@@ -1,5 +1,3 @@
-import type {RouteWithLineIndex} from './routes'
-
 export type Bucket<T> = {label: string; items: T[]}
 
 type BucketOptions<T> = {
@@ -38,7 +36,5 @@ export const UNKNOWN_SESSION = 'Inconnue'
 /** "2025 oct" se trie sur son année ; les voies sans session passent en tête. */
 export const sessionSortKey = (label: string): number =>
   label === UNKNOWN_SESSION ? -Infinity : parseInt(label.replace(/[^0-9]/g, ''))
-
-export const byLine = (bucket: Bucket<RouteWithLineIndex>): number => bucket.items[0].lineIndex
 
 export const byCountDesc = <T>(bucket: Bucket<T>): number => -bucket.items.length

@@ -1,5 +1,5 @@
 import {fail, redirect} from '@sveltejs/kit'
-import {claimRoute, releaseRoute} from '$lib/server/repo/openings'
+import {claimRoute, markRemoved, releaseRoute} from '$lib/server/repo/openings'
 import {getWall} from '$lib/server/repo/walls'
 import type {Actions, PageServerLoad} from './$types'
 
@@ -30,6 +30,12 @@ export const actions: Actions = {
   release: async ({locals, params, request}) => {
     const form = await request.formData()
     await releaseRoute(locals.db, locals.club!, String(form.get('route') ?? ''))
+    redirect(303, `/${params.club}/ouvertures`)
+  },
+
+  remove: async ({locals, params, request}) => {
+    const form = await request.formData()
+    await markRemoved(locals.db, locals.club!, String(form.get('route') ?? ''))
     redirect(303, `/${params.club}/ouvertures`)
   },
 }

@@ -5,7 +5,7 @@ import {beforeEach, describe, expect, it} from 'vitest'
 import type {Club, Route} from '$lib/domain/types'
 import type {Database} from '../db/schema'
 import {getClubBySlug, listClubs} from './clubs'
-import {claimRoute, releaseRoute} from './openings'
+import {claimRoute, markRemoved, releaseRoute} from './openings'
 import {getWall, listSessions, saveRoute, type PositionedRoute} from './walls'
 
 // Ces tests valident les requêtes sur SQLite, pas les particularités de D1
@@ -208,6 +208,23 @@ describe('claimRoute', () => {
 
   it('ignore une voie qui appartient à un autre club', async () => {
     expect(await claimRoute(db, {...club, id: club.id + 1}, 'a', 'seb')).toBe(false)
+  })
+})
+
+describe('markRemoved', () => {
+  it("retire la voie du mur comme une suppression depuis l'éditeur", async () => {
+    await put({id: 'a', toRemove: true})
+    expect(await markRemoved(db, club, 'a')).toBe(true)
+    expect((await getWall(db, club)).flat()[0].deletedAt).not.toBeNull()
+  })
+
+  it("ne touche ni une voie déjà supprimée ni celle d'un autre club", async () => {
+    await put({id: 'a', deletedAt: '2024-03-02T10:00:00.000Z'})
+    expect(await markRemoved(db, club, 'a')).toBe(false)
+    expect((await getWall(db, club)).flat()[0].deletedAt).toBe('2024-03-02T10:00:00.000Z')
+
+    await put({id: 'b'})
+    expect(await markRemoved(db, {...club, id: club.id + 1}, 'b')).toBe(false)
   })
 })
 

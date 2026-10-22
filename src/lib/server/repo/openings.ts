@@ -33,3 +33,17 @@ export const releaseRoute = async (db: Kysely<Database>, club: Club, routeId: st
     .where('clubId', '=', club.id)
     .execute()
 }
+
+/** Une voie démontée au mur est supprimée comme depuis l'éditeur : elle quitte le mur, pas l'historique. */
+export const markRemoved = async (db: Kysely<Database>, club: Club, routeId: string): Promise<boolean> => {
+  const now = new Date().toISOString()
+  const result = await db
+    .updateTable('route')
+    .set({deletedAt: now, updatedAt: now})
+    .where('id', '=', routeId)
+    .where('clubId', '=', club.id)
+    .where('deletedAt', 'is', null)
+    .executeTakeFirst()
+
+  return Number(result.numUpdatedRows) > 0
+}
